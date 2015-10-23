@@ -43,6 +43,7 @@ ActiveRecord::Schema.define(version: 20151023023026) do
     t.integer  "support_source_id", null: false, foreign_key: {references: "support_sources", name: "fk_tickets_support_source_id", on_update: :cascade, on_delete: :cascade}, index: {name: "fk__tickets_support_source_id", using: :btree}
     t.string   "title",             null: false
     t.string   "external_id"
+    t.integer  "status",            default: 0, null: false
     t.datetime "created_at",        null: false
     t.datetime "updated_at",        null: false
   end

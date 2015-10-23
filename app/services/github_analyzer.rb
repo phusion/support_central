@@ -1,4 +1,12 @@
 class GithubAnalyzer < Analyzer
+  class Error < StandardError
+  end
+
+  def initialize
+    @octokit = Octokit::Client.new(:access_token => CONFIG['github_api_token'])
+    @octokit.auto_paginate = true
+  end
+
   def analyze
     Ticket.transaction do
       sources = GithubSupportSource.all
@@ -10,49 +18,68 @@ class GithubAnalyzer < Analyzer
 private
   def fetch_unanswered_issues(sources)
     result = []
-    determine_api_endpoints(sources).each do |url|
-      make_request(url)
-      issues.each do |issue|
-        if issue['labels'].include?('Unanswered')
-          result << issue
-        end
-      end
+    sources.each do |source|
+      issues = fetch_unanswered_issues_from(source)
+      result.concat(issues)
     end
     result
   end
 
-  def determine_api_endpoints(sources)
-    sources.map do |source|
-      issues_api_url(source)
-    end
-  end
-
-  def issues_api_url(source)
-    "https://api.github.com/repos/#{source.github_owner_and_repo}/issues"
+  def fetch_unanswered_issues_from(source)
+    @octokit.issues(source.github_owner_and_repo,
+      state: 'all', labels: 'Unanswered')
   end
 
   def synchronize_tickets(sources, unanswered_issues)
     support_source_ids = sources.map { |source| source.id }
-    unanswered_issue_ids = unanswered_issues.
-      map { |issue| issue['id'].to_i.to_s }
+    unanswered_issue_numbers = unanswered_issues.
+      map { |issue| issue.number.to_i.to_s }
 
     # Delete all tickets for which the corresponding issue has already
     # been answered
-    Ticket.
-      where(support_source_id: support_source_ids).
-      where('external_id NOT IN (?)', unanswered_issue_ids).
-      delete_all
+    if unanswered_issue_numbers.empty?
+      Ticket.
+        where(support_source_id: support_source_ids).
+        delete_all
+    else
+      Ticket.
+        where(support_source_id: support_source_ids).
+        where('external_id NOT IN (?)', unanswered_issue_numbers).
+        delete_all
+    end
 
-    # Find IDs of unaswered issues for which we don't have tickets yet
-    new_ids = ActiveRecord::Base.connection.select_values(%Q{
-      SELECT UNNEST(ARRAY#{unanswered_issue_ids.inspect})
-      EXCEPT (SELECT external_id FROM tickets
-        WHERE support_source_id IN (#{support_source_ids.inspect}))
-    })
+    # Find the numbers of unanswered issues for which we don't have
+    # tickets yet
+    if unanswered_issue_numbers.empty?
+      new_numbers = []
+    else
+      new_numbers = ActiveRecord::Base.connection.select_values(%Q{
+        SELECT UNNEST(ARRAY[%s])
+        EXCEPT (SELECT external_id FROM tickets
+          WHERE support_source_id IN (%s))
+      } % [
+        quote_array(unanswered_issue_numbers),
+        quote_array(support_source_ids)
+      ])
+    end
 
     # Create tickets for unanswered issues for which we don't have
     # tickets yet
-    new_ids.each do ||
+    unanswered_issues_index = {}
+    unanswered_issues.each do |issue|
+      unanswered_issues_index[issue.number] = issue
     end
+    new_numbers.each do |number|
+      number = number.to_i
+      issue = unanswered_issues_index[number]
+      sources.each do |source|
+        source.tickets.create!(title: issue.title,
+          external_id: issue.number)
+      end
+    end
+  end
+
+  def quote_array(array)
+    array.map { |s| ActiveRecord::Base.connection.quote(s) }.join(',')
   end
 end

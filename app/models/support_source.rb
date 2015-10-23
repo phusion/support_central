@@ -18,10 +18,6 @@
 #
 #  fk__support_sources_user_id  (user_id)
 #
-# Foreign Keys
-#
-#  fk_support_sources_user_id  (user_id => users.id)
-#
 
 class SupportSource < ActiveRecord::Base
 end

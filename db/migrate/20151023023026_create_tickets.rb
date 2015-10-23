@@ -5,6 +5,7 @@ class CreateTickets < ActiveRecord::Migration
         on_update: :cascade, on_delete: :cascade
       t.string :title, null: false
       t.string :external_id, foreign_key: false
+      t.integer :status, null: false, default: 0
       t.timestamps null: false
     end
   end

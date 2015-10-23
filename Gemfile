@@ -26,6 +26,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 
 gem 'pg'
 gem 'devise'
+gem 'octokit'
+gem 'net-http-persistent'
 gem 'schema_associations'
 gem 'schema_auto_foreign_keys'
 gem 'schema_validations'
@@ -33,6 +35,7 @@ gem 'schema_validations'
 group :development do
   gem 'quiet_assets'
   gem 'annotate'
+  gem 'spring-commands-rspec'
   gem 'capistrano-rails'
 end
 
