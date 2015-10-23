@@ -24,6 +24,7 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 # Use ActiveModel has_secure_password
 # gem 'bcrypt', '~> 3.1.7'
 
+gem 'pg'
 gem 'devise'
 gem 'schema_associations'
 gem 'schema_auto_foreign_keys'
@@ -36,8 +37,6 @@ group :development do
 end
 
 group :development, :test do
-  gem 'sqlite3'
-
   # Call 'debugger' anywhere in the code to stop execution and get a debugger console
   #gem 'debugger'
 
