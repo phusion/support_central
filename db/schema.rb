@@ -13,11 +13,13 @@
 
 ActiveRecord::Schema.define(version: 20151023023026) do
 
-  PRAGMA FOREIGN_KEYS = ON;
+  # These are extensions that must be enabled in order to support this database
+  enable_extension "plpgsql"
+
   create_table "users", force: :cascade do |t|
-    t.string   "email",                  default: "", null: false, index: {name: "index_users_on_email", unique: true}
+    t.string   "email",                  default: "", null: false, index: {name: "index_users_on_email", unique: true, using: :btree}
     t.string   "encrypted_password",     default: "", null: false
-    t.string   "reset_password_token",   index: {name: "index_users_on_reset_password_token", unique: true}
+    t.string   "reset_password_token",   index: {name: "index_users_on_reset_password_token", unique: true, using: :btree}
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.datetime "created_at",             null: false
@@ -27,7 +29,7 @@ ActiveRecord::Schema.define(version: 20151023023026) do
   create_table "support_sources", force: :cascade do |t|
     t.string   "type",                  null: false
     t.string   "name",                  null: false
-    t.integer  "user_id",               null: false, foreign_key: {references: "users", name: "fk_support_sources_user_id", on_update: :cascade, on_delete: :cascade}, index: {name: "fk__support_sources_user_id"}
+    t.integer  "user_id",               null: false, foreign_key: {references: "users", name: "fk_support_sources_user_id", on_update: :cascade, on_delete: :cascade}, index: {name: "fk__support_sources_user_id", using: :btree}
     t.datetime "created_at",            null: false
     t.datetime "updated_at",            null: false
     t.string   "github_owner_and_repo"
@@ -38,7 +40,7 @@ ActiveRecord::Schema.define(version: 20151023023026) do
   end
 
   create_table "tickets", force: :cascade do |t|
-    t.integer  "support_source_id", null: false, foreign_key: {references: "support_sources", name: "fk_tickets_support_source_id", on_update: :cascade, on_delete: :cascade}, index: {name: "fk__tickets_support_source_id"}
+    t.integer  "support_source_id", null: false, foreign_key: {references: "support_sources", name: "fk_tickets_support_source_id", on_update: :cascade, on_delete: :cascade}, index: {name: "fk__tickets_support_source_id", using: :btree}
     t.string   "title",             null: false
     t.string   "external_id"
     t.datetime "created_at",        null: false

@@ -13,6 +13,10 @@
 #
 #  fk__tickets_support_source_id  (support_source_id)
 #
+# Foreign Keys
+#
+#  fk_tickets_support_source_id  (support_source_id => support_sources.id)
+#
 
 class Ticket < ActiveRecord::Base
   def external_url
