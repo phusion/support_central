@@ -19,8 +19,8 @@
 #  fk__support_sources_user_id  (user_id)
 #
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe GithubSupportSource do
+RSpec.describe GithubSupportSource, type: :model do
   pending "add some examples to (or delete) #{__FILE__}"
 end

@@ -15,8 +15,8 @@
 #  fk__tickets_support_source_id  (support_source_id)
 #
 
-require 'spec_helper'
+require 'rails_helper'
 
-describe Ticket do
+RSpec.describe Ticket, type: :model do
   pending "add some examples to (or delete) #{__FILE__}"
 end

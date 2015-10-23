@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe GithubAnalyzer do
   let(:api_endpoint) { 'https://api.github.com/repos/phusion/passenger/issues?labels=Unanswered&per_page=100&state=all' }

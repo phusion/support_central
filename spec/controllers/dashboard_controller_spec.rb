@@ -1,5 +1,5 @@
-require 'spec_helper'
+require 'rails_helper'
 
-describe DashboardController do
+RSpec.describe DashboardController, type: :controller do
 
 end

@@ -1,4 +1,4 @@
-require 'spec_helper'
+require 'rails_helper'
 
 describe SupportbeeAnalyzer do
   def create_dependencies
