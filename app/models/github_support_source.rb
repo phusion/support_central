@@ -12,7 +12,7 @@
 #  supportbee_company_id :string
 #  supportbee_auth_token :string
 #  supportbee_user_id    :string
-#  supportbee_group_id   :integer
+#  supportbee_group_ids  :text             default([]), is an Array
 #
 # Indexes
 #
@@ -20,6 +20,8 @@
 #
 
 class GithubSupportSource < SupportSource
+  validates :github_owner_and_repo, presence: true
+
   def ticket_url(ticket)
     "https://github.com/#{github_owner_and_repo}/issues/#{ticket.external_id}"
   end

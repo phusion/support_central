@@ -36,7 +36,7 @@ ActiveRecord::Schema.define(version: 20151023023026) do
     t.string   "supportbee_company_id"
     t.string   "supportbee_auth_token"
     t.string   "supportbee_user_id"
-    t.integer  "supportbee_group_id"
+    t.text     "supportbee_group_ids",  default: [],              array: true
   end
 
   create_table "tickets", force: :cascade do |t|

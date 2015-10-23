@@ -12,7 +12,7 @@
 #  supportbee_company_id :string
 #  supportbee_auth_token :string
 #  supportbee_user_id    :string
-#  supportbee_group_id   :integer
+#  supportbee_group_ids  :text             default([]), is an Array
 #
 # Indexes
 #
@@ -20,6 +20,9 @@
 #
 
 class SupportbeeSupportSource < SupportSource
+  validates :supportbee_company_id, :supportbee_auth_token, :supportbee_user_id,
+    :supportbee_group_ids, presence: true
+
   def ticket_url(ticket)
     "https://#{supportbee_company_id}.supportbee.com/tickets/#{ticket.external_id}"
   end

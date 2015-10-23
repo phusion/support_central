@@ -14,7 +14,7 @@ class CreateSupportSources < ActiveRecord::Migration
       t.string :supportbee_company_id, foreign_key: false
       t.string :supportbee_auth_token
       t.string :supportbee_user_id, foreign_key: false
-      t.integer :supportbee_group_id, foreign_key: false
+      t.text :supportbee_group_ids, array: true, default: []
     end
   end
 end

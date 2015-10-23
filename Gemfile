@@ -27,6 +27,7 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'pg'
 gem 'devise'
 gem 'octokit'
+gem 'supportbee'
 gem 'net-http-persistent'
 gem 'schema_associations'
 gem 'schema_auto_foreign_keys'

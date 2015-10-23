@@ -8,32 +8,18 @@ describe GithubAnalyzer do
     @github = create(:github_passenger, user: @user)
   end
 
-  def create_tickets(support_source)
-    @passenger_crash_monday = create(:passenger_crash_monday,
-      support_source: support_source)
-    @ruby_5_0_not_supported = create(:ruby_5_0_not_supported,
-      support_source: support_source)
-    @npm_package_needed = create(:npm_package_needed,
-      support_source: support_source)
-    @off_by_one_bug = create(:off_by_one_bug,
-      support_source: support_source)
-    @apache_uploads_fail = create(:apache_uploads_fail,
-      support_source: support_source)
-    @support_ubuntu_2020 = create(:support_ubuntu_2020,
-      support_source: support_source)
-  end
-
-  def ticket_to_json(ticket)
+  def ticket_as_json(ticket)
     {
       'id' => ticket.id,
       'number' => ticket.external_id.to_i,
-      'title' => ticket.title
+      'title' => ticket.title,
+      'html_url' => "https://github.com/#{ticket.external_id}"
     }
   end
 
-  def tickets_to_json(*tickets)
+  def tickets_as_json(*tickets)
     tickets.flatten.map do |ticket|
-      ticket_to_json(ticket)
+      ticket_as_json(ticket)
     end
   end
 
@@ -48,7 +34,7 @@ describe GithubAnalyzer do
     @off_by_one_bug = create(:off_by_one_bug,
       support_source: @github)
 
-    stubbed_body = tickets_to_json(@ruby_5_0_not_supported, @npm_package_needed)
+    stubbed_body = tickets_as_json(@ruby_5_0_not_supported, @npm_package_needed)
     stub_request(:get, api_endpoint).
       to_return(status: 200, headers: { 'Content-Type': 'application/json' },
         body: stubbed_body.to_json)
@@ -82,21 +68,23 @@ describe GithubAnalyzer do
     expect(Ticket.count).to eq(0)
   end
 
-  it 'creates tickets for unanswered issues for which we do not have tickets yet' do
+  it 'creates tickets for not-seen-before unanswered issues' do
     create_dependencies
     @passenger_crash_monday = create(:passenger_crash_monday,
       support_source: @github)
 
-    stubbed_body = tickets_to_json(@passenger_crash_monday) + [
+    stubbed_body = tickets_as_json(@passenger_crash_monday) + [
       {
         'id' => 1,
         'number' => 1,
-        'title' => 'New ticket 1'
+        'title' => 'New ticket 1',
+        'html_url' => 'https://github.com/phusion/passenger/issues/1'
       },
       {
         'id' => 2,
         'number' => 2,
-        'title' => 'New ticket 2'
+        'title' => 'New ticket 2',
+        'html_url' => 'https://github.com/phusion/passenger/issues/2'
       }
     ]
     stub_request(:get, api_endpoint).
@@ -108,10 +96,12 @@ describe GithubAnalyzer do
     expect(Ticket.count).to eq(3)
     expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
 
-    ticket1 = Ticket.where(external_id: '1').first
+    ticket1 = Ticket.where(external_id: 'phusion/passenger/issues/1').first
+    expect(ticket1).not_to be_nil
     expect(ticket1.title).to eq('New ticket 1')
 
-    ticket2 = Ticket.where(external_id: '2').first
+    ticket2 = Ticket.where(external_id: 'phusion/passenger/issues/2').first
+    expect(ticket2).not_to be_nil
     expect(ticket2.title).to eq('New ticket 2')
   end
 
@@ -126,7 +116,7 @@ describe GithubAnalyzer do
     @off_by_one_bug = create(:off_by_one_bug,
       support_source: @github)
 
-    stubbed_body = tickets_to_json(@passenger_crash_monday,
+    stubbed_body = tickets_as_json(@passenger_crash_monday,
       @ruby_5_0_not_supported, @npm_package_needed,
       @off_by_one_bug)
     stub_request(:get, api_endpoint).

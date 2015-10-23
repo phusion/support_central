@@ -12,7 +12,7 @@
 #  supportbee_company_id :string
 #  supportbee_auth_token :string
 #  supportbee_user_id    :string
-#  supportbee_group_id   :integer
+#  supportbee_group_ids  :text             default([]), is an Array
 #
 # Indexes
 #
