@@ -49,3 +49,9 @@ group :development, :test do
   gem 'rspec-rails'
 end
 
+group :test do
+  gem 'test-unit'
+  gem 'webmock'
+  gem 'factory_girl_rails'
+  gem 'database_cleaner'
+end

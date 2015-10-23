@@ -36,7 +36,8 @@ private
     unanswered_issue_ids = unanswered_issues.
       map { |issue| issue['id'].to_i.to_s }
 
-    # Delete all tickets associated with answered issues
+    # Delete all tickets for which the corresponding issue has already
+    # been answered
     Ticket.
       where(support_source_id: support_source_ids).
       where('external_id NOT IN (?)', unanswered_issue_ids).
