@@ -13,3 +13,18 @@ trim_trailing_whitespace = true
 indent_style = space
 indent_size = 2
 trim_trailing_whitespace = true
+
+[*.html.erb]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.css]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true
+
+[*.scss]
+indent_style = space
+indent_size = 4
+trim_trailing_whitespace = true

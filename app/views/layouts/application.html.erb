@@ -1,18 +1,41 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>SupportCentral</title>
+  <title>Support Central</title>
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
   <%= csrf_meta_tags %>
 </head>
 <body>
 
+    <header>
+        <div class="account-actions">
+            <% if current_user %>
+                <%= current_user.email %><br><br>
+                <%= link_to 'Admin area', '#' %><br><br>
+                <%= link_to 'Edit profile', edit_user_registration_path %><br>
+                <%= link_to 'Delete account', edit_user_registration_path(anchor: 'delete-my-account') %><br>
+                <%= link_to 'Logout', destroy_user_session_path, method: 'delete' %>
+            <% else %>
+                <%= link_to 'Login', new_user_session_path %><br>
+                <%= link_to 'Create account', new_user_registration_path %>
+            <% end %>
+        </div>
+        <%= link_to(image_tag('logo-black.png', height: 128, height: 163,
+                alt: 'Support Central'), root_path) %>
+    </header>
 
-<p class="notice"><%= notice %></p>
-<p class="alert"><%= alert %></p>
+    <div class="container">
+        <% if notice %>
+            <div class="alert alert-success"><%= notice %></div>
+        <% end %>
+        <% if alert %>
+            <div class="alert alert-danger"><%= alert %></div>
+        <% end %>
 
-<%= yield %>
+        <%= yield %>
+    </div>
+
+    <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
 
 </body>
 </html>

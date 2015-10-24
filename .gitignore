@@ -8,6 +8,8 @@
 /.bundle
 
 /config/*.yml
+*.pid
+*.lock
 
 # Ignore the default SQLite database.
 /db/*.sqlite3

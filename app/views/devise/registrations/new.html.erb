@@ -1,0 +1,9 @@
+<h2>Create a new user account</h2>
+
+<ol>
+    <li>Add the new user to Support Central's <a href="">db/seeds.rb</a>.</li>
+    <li>Commit and deploy the Support Central update: <tt>bundle exec cap production deploy</tt></li>
+    <li>Login to: <tt>support_central@internal.phusion.nl</tt></li>
+    <li>Run: <tt>cd /var/www/support_central/current &amp;&amp; bundle exec rake db:seed RAILS_ENV=production</tt></li>
+    <li><%= link_to "Issue a password reset", new_password_path(resource_name) %> for that user.</li>
+</ol>
