@@ -68,8 +68,8 @@ private
 
   def synchronize_internal_tickets
     delete_internal_tickets_for_which_external_ticket_is_answered
-    create_internal_tickets_for_which_external_ticket_is_not_known
     update_internal_tickets_based_on_external_tickets
+    create_internal_tickets_for_which_external_ticket_is_not_known
   end
 
   def delete_internal_tickets_for_which_external_ticket_is_answered
@@ -82,6 +82,17 @@ private
         where(support_source_id: @support_source_ids).
         where('external_id NOT IN (?)', @unanswered_external_ticket_ids).
         delete_all
+    end
+  end
+
+  def update_internal_tickets_based_on_external_tickets
+    if respond_to?(:update_internal_ticket, true)
+      internal_tickets = Ticket.where(support_source_id: @support_source_ids)
+      internal_tickets.each do |internal_ticket|
+        external_ticket = @unanswered_external_tickets_index[
+          internal_ticket.external_id]
+        update_internal_ticket(internal_ticket, external_ticket)
+      end
     end
   end
 
@@ -113,10 +124,6 @@ private
         )
       end
     end
-  end
-
-  def update_internal_tickets_based_on_external_tickets
-    # TODO
   end
 
   def sql_select_values(*args)

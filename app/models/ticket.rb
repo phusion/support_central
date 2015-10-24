@@ -16,7 +16,7 @@
 #
 
 class Ticket < ActiveRecord::Base
-  enum status: { normal: 0, warning: 1, overdue: 2 }
+  enum status: { normal: 0, respond_now: 1, overdue: 2 }
 
   def external_url
     support_source.ticket_url(self)

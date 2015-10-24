@@ -55,6 +55,20 @@ protected
     end
   end
 
+  def update_internal_ticket(internal_ticket, external_ticket)
+    labels = external_ticket['labels'].map { |l| l['name'] }
+    if labels.include?('overdue')
+      new_status = 'overdue'
+    elsif labels.include?('respond now')
+      new_status = 'respond_now'
+    else
+      new_status = 'normal'
+    end
+    if internal_ticket.status != new_status
+      internal_ticket.update_attribute(:status, new_status)
+    end
+  end
+
 private
   def query_unanswered_tickets(client, options)
     client.tickets(options).find_all do |external_ticket|

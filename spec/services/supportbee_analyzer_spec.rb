@@ -22,7 +22,8 @@ describe SupportbeeAnalyzer do
       ticket.external_id =~ /(\d+)$/
       ticket = {
         id: $1.to_i,
-        subject: ticket.title
+        subject: ticket.title,
+        labels: []
       }
     end
     if !ticket.key?(:unanswered)
@@ -260,6 +261,106 @@ describe SupportbeeAnalyzer do
       expect(Ticket.exists?(@bundle_install_error.id)).to be_falsey
       expect(Ticket.exists?(@apt_repo_down.id)).to be_truthy
       expect(Ticket.exists?(@yum_repo_signature_error.id)).to be_falsey
+    end
+
+    it "sets a ticket's status to 'respond_now' if the corresponding " \
+       "Supportbee ticket has the 'respond now' label" \
+    do
+      create_dependencies
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        support_source: @supportbee)
+
+      json = ticket_as_json(@frequent_memory_warnings, false)
+      json[:labels] = [ { name: 'respond now' } ]
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(json))
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
+
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+      @frequent_memory_warnings.reload
+      expect(@frequent_memory_warnings.status).to eq('respond_now')
+    end
+
+    it "sets a ticket's status to 'overdue' if the corresponding " \
+       "Supportbee ticket has the 'overdue' label" \
+    do
+      create_dependencies
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        support_source: @supportbee)
+
+      json = ticket_as_json(@frequent_memory_warnings, false)
+      json[:labels] = [ { name: 'overdue' } ]
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(json))
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
+
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+      @frequent_memory_warnings.reload
+      expect(@frequent_memory_warnings.status).to eq('overdue')
+    end
+
+    it "sets a ticket's status to 'overdue' if the corresponding " \
+       "Supportbee ticket has both the 'respond now' and 'overdue' labels" \
+    do
+      create_dependencies
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        support_source: @supportbee)
+
+      json = ticket_as_json(@frequent_memory_warnings, false)
+      json[:labels] = [ { name: 'respond now' }, { name: 'overdue' } ]
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(json))
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
+
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+      @frequent_memory_warnings.reload
+      expect(@frequent_memory_warnings.status).to eq('overdue')
+    end
+
+    it "sets a ticket's status to 'normal' if the corresponding " \
+       "Supportbee ticket has neither the 'respond now' nor the 'overdue' label" \
+    do
+      create_dependencies
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        status: 'overdue',
+        support_source: @supportbee)
+
+      json = ticket_as_json(@frequent_memory_warnings, false)
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(json))
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
+
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+      @frequent_memory_warnings.reload
+      expect(@frequent_memory_warnings.status).to eq('normal')
     end
   end
 
