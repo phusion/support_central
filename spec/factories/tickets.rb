@@ -16,6 +16,8 @@
 #
 
 FactoryGirl.define do
+  ### Github issues ###
+
   factory :passenger_crash_monday, class: 'Ticket' do
     title 'Passenger crashes on Monday'
     external_id 'phusion/passenger/issues/27'
@@ -46,6 +48,7 @@ FactoryGirl.define do
     external_id 'phusion/passenger/issues/32'
   end
 
+  ### Supportbee tickets ###
 
   factory :frequent_memory_warnings, class: 'Ticket' do
     title 'Frequent memory warnings'
@@ -65,5 +68,10 @@ FactoryGirl.define do
   factory :yum_repo_signature_error, class: 'Ticket' do
     title 'YUM repo signature error'
     external_id '54'
+  end
+
+  factory :view_rolling_restart_status, class: 'Ticket' do
+    title 'View rolling restart status'
+    external_id '55'
   end
 end

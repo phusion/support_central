@@ -8,19 +8,25 @@ describe GithubAnalyzer do
     @github = create(:github_passenger, user: @user)
   end
 
-  def ticket_as_json(ticket)
-    {
-      'id' => ticket.id,
-      'number' => ticket.external_id.to_i,
-      'title' => ticket.title,
-      'html_url' => "https://github.com/#{ticket.external_id}"
-    }
+  def stub_github_request(body)
+    if !body.is_a?(String)
+      body = body.to_json
+    end
+    stub_request(:get, api_endpoint).
+      to_return(status: 200,
+        headers: { 'Content-Type' => 'application/json' },
+        body: body)
   end
 
-  def tickets_as_json(*tickets)
-    tickets.flatten.map do |ticket|
-      ticket_as_json(ticket)
-    end
+  def ticket_as_json(ticket)
+    result = {
+      id: ticket.id,
+      number: ticket.external_id.to_i,
+      title: ticket.title,
+      html_url: "https://github.com/#{ticket.external_id}",
+      labels: [ { name: 'Unanswered' } ]
+    }
+    result
   end
 
   it 'deletes tickets for which the corresponding issue has already been answered' do
@@ -34,10 +40,10 @@ describe GithubAnalyzer do
     @off_by_one_bug = create(:off_by_one_bug,
       support_source: @github)
 
-    stubbed_body = tickets_as_json(@ruby_5_0_not_supported, @npm_package_needed)
-    stub = stub_request(:get, api_endpoint).
-      to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-        body: stubbed_body.to_json)
+    stub = stub_github_request([
+      ticket_as_json(@ruby_5_0_not_supported),
+      ticket_as_json(@npm_package_needed)
+    ])
 
     GithubAnalyzer.new.analyze
 
@@ -51,18 +57,14 @@ describe GithubAnalyzer do
 
   it 'deletes all tickets if there are no unanswered issues' do
     create_dependencies
-    @passenger_crash_monday = create(:passenger_crash_monday,
+    create(:passenger_crash_monday,
       support_source: @github)
-    @ruby_5_0_not_supported = create(:ruby_5_0_not_supported,
+    create(:ruby_5_0_not_supported,
       support_source: @github)
-    @npm_package_needed = create(:npm_package_needed,
-      support_source: @github)
-    @off_by_one_bug = create(:off_by_one_bug,
+    create(:npm_package_needed,
       support_source: @github)
 
-    stub = stub_request(:get, api_endpoint).
-      to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-        body: '[]')
+    stub = stub_github_request([])
 
     GithubAnalyzer.new.analyze
 
@@ -75,23 +77,23 @@ describe GithubAnalyzer do
     @passenger_crash_monday = create(:passenger_crash_monday,
       support_source: @github)
 
-    stubbed_body = tickets_as_json(@passenger_crash_monday) + [
+    stub = stub_github_request([
+      ticket_as_json(@passenger_crash_monday),
       {
-        'id' => 1,
-        'number' => 1,
-        'title' => 'New ticket 1',
-        'html_url' => 'https://github.com/phusion/passenger/issues/1'
+        id: 1,
+        number: 1,
+        title: 'New ticket 1',
+        html_url: 'https://github.com/phusion/passenger/issues/1',
+        labels: [ { name: 'Unanswered' } ]
       },
       {
-        'id' => 2,
-        'number' => 2,
-        'title' => 'New ticket 2',
-        'html_url' => 'https://github.com/phusion/passenger/issues/2'
+        id: 2,
+        number: 2,
+        title: 'New ticket 2',
+        html_url: 'https://github.com/phusion/passenger/issues/2',
+        labels: [ { name: 'Unanswered' } ]
       }
-    ]
-    stub = stub_request(:get, api_endpoint).
-      to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-        body: stubbed_body.to_json)
+    ])
 
     GithubAnalyzer.new.analyze
 
@@ -119,12 +121,12 @@ describe GithubAnalyzer do
     @off_by_one_bug = create(:off_by_one_bug,
       support_source: @github)
 
-    stubbed_body = tickets_as_json(@passenger_crash_monday,
-      @ruby_5_0_not_supported, @npm_package_needed,
-      @off_by_one_bug)
-    stub = stub_request(:get, api_endpoint).
-      to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-        body: stubbed_body.to_json)
+    stub = stub_github_request([
+      ticket_as_json(@passenger_crash_monday),
+      ticket_as_json(@ruby_5_0_not_supported),
+      ticket_as_json(@npm_package_needed),
+      ticket_as_json(@off_by_one_bug)
+    ])
 
     GithubAnalyzer.new.analyze
 
@@ -148,9 +150,7 @@ describe GithubAnalyzer do
     @off_by_one_bug = create(:off_by_one_bug,
       support_source: @github)
 
-    stub = stub_request(:get, api_endpoint).
-      to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-        body: '[]')
+    stub = stub_github_request([])
 
     GithubAnalyzer.new.analyze
 

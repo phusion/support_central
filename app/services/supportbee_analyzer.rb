@@ -21,9 +21,9 @@ protected
     @data_sources.each do |source|
       client = Supportbee::Client.new(company: source.company_id,
         auth_token: source.auth_token)
-      result.concat(client.tickets(assigned_user: 'none'))
-      result.concat(client.tickets(assigned_user: 'me'))
-      result.concat(client.tickets(assigned_group: 'mine'))
+      result.concat(query_unanswered_tickets(client, assigned_user: 'none'))
+      result.concat(query_unanswered_tickets(client, assigned_user: 'me'))
+      result.concat(query_unanswered_tickets(client, assigned_group: 'mine'))
     end
     result
   end
@@ -52,6 +52,13 @@ protected
       end
     else
       @support_sources
+    end
+  end
+
+private
+  def query_unanswered_tickets(client, options)
+    client.tickets(options).find_all do |external_ticket|
+      external_ticket['unanswered']
     end
   end
 end

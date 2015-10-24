@@ -7,30 +7,35 @@ describe SupportbeeAnalyzer do
   end
 
   def stub_supportbee_request(assignment, body, auth_token = 1234)
-    url = "https://phusion.supportbee.com/tickets.json?archived=false&#{assignment}&auth_token=#{auth_token}&page=1&spam=false&trash=false"
+    url = "https://phusion.supportbee.com/tickets.json?archived=false&" \
+      "#{assignment}&auth_token=#{auth_token}&page=1&spam=false&trash=false"
+    if !body.is_a?(String)
+      body = body.to_json
+    end
     stub_request(:get, url).
-      to_return(status: 200, headers: { 'Content-Type': 'application/json' },
+      to_return(status: 200, headers: { 'Content-Type' => 'application/json' },
         body: body)
   end
 
-  def ticket_as_json(ticket)
+  def ticket_as_json(ticket, answered)
     if !ticket.is_a?(Hash)
+      ticket.external_id =~ /(\d+)$/
       ticket = {
-        'id' => ticket.external_id.to_i,
-        'subject' => ticket.title
+        id: $1.to_i,
+        subject: ticket.title
       }
     end
-    ticket['unanswered'] = true
-    ticket['archived'] = false
-    ticket['spam'] = false
-    ticket['trash'] = false
+    if !ticket.key?(:unanswered)
+      ticket[:unanswered] = !answered
+    end
+    ticket[:archived] = false
+    ticket[:spam] = false
+    ticket[:trash] = false
     ticket
   end
 
-  def tickets_as_json(*tickets)
-    tickets = tickets.flatten.map do |ticket|
-      ticket_as_json(ticket)
-    end
+  def make_tickets_array(*tickets)
+    tickets = tickets.flatten
     {
       'total' => tickets.size,
       'current_page' => 1,
@@ -43,87 +48,145 @@ describe SupportbeeAnalyzer do
   context 'when there is one user' do
     it 'deletes internal tickets for which the corresponding Supportbee ticket has already been answered' do
       create_dependencies
-      @passenger_crash_monday = create(:passenger_crash_monday,
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @supportbee)
-      @ruby_5_0_not_supported = create(:ruby_5_0_not_supported,
+      @bundle_install_error = create(:bundle_install_error,
         support_source: @supportbee)
-      @npm_package_needed = create(:npm_package_needed,
+      @apt_repo_down = create(:apt_repo_down,
         support_source: @supportbee)
-      @off_by_one_bug = create(:off_by_one_bug,
+      @yum_repo_signature_error = create(:yum_repo_signature_error,
         support_source: @supportbee)
-      @apache_uploads_fail = create(:apache_uploads_fail,
+      @view_rolling_restart_status = create(:view_rolling_restart_status,
         support_source: @supportbee)
 
-      stub1 = stub_request(:get, api_endpoint_none_assigned).
-        to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-          body: tickets_as_json(@ruby_5_0_not_supported).to_json)
-      stub2 = stub_request(:get, api_endpoint_me_assigned).
-        to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-          body: tickets_as_json(@npm_package_needed).to_json)
-      stub3 = stub_request(:get, api_endpoint_my_groups_assigned).
-        to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-          body: tickets_as_json(@off_by_one_bug).to_json)
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(
+          ticket_as_json(@frequent_memory_warnings, false),
+          ticket_as_json(@bundle_install_error, true)
+        )
+      )
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array(
+          ticket_as_json(@apt_repo_down, true)
+        )
+      )
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array(
+          ticket_as_json(@yum_repo_signature_error, true),
+          ticket_as_json(@view_rolling_restart_status, false)
+        )
+      )
 
       SupportbeeAnalyzer.new.analyze
 
       assert_requested(stub1)
       assert_requested(stub2)
       assert_requested(stub3)
-      expect(Ticket.count).to eq(3)
-      expect(Ticket.exists?(@passenger_crash_monday.id)).to be_falsey
-      expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_truthy
-      expect(Ticket.exists?(@npm_package_needed.id)).to be_truthy
-      expect(Ticket.exists?(@off_by_one_bug.id)).to be_truthy
-      expect(Ticket.exists?(@apache_uploads_fail.id)).to be_falsey
+      expect(Ticket.count).to eq(2)
+      expect(Ticket.exists?(@frequent_memory_warnings.id)).to be_truthy
+      expect(Ticket.exists?(@bundle_install_error.id)).to be_falsey
+      expect(Ticket.exists?(@apt_repo_down.id)).to be_falsey
+      expect(Ticket.exists?(@yum_repo_signature_error.id)).to be_falsey
+      expect(Ticket.exists?(@view_rolling_restart_status.id)).to be_truthy
+    end
+
+    it 'deletes internal tickets for which there is no corresponding Supportbee ticket' do
+      create_dependencies
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        support_source: @supportbee)
+      @bundle_install_error = create(:bundle_install_error,
+        support_source: @supportbee)
+      @apt_repo_down = create(:apt_repo_down,
+        support_source: @supportbee)
+
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(
+          ticket_as_json(@bundle_install_error, true)
+        )
+      )
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array(
+          ticket_as_json(@apt_repo_down, false)
+        )
+      )
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
+
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+      expect(Ticket.count).to eq(1)
+      expect(Ticket.exists?(@frequent_memory_warnings.id)).to be_falsey
+      expect(Ticket.exists?(@bundle_install_error.id)).to be_falsey
+      expect(Ticket.exists?(@apt_repo_down.id)).to be_truthy
     end
 
     it 'deletes all internal tickets if there are no unanswered Supportbee tickets' do
       create_dependencies
-      @passenger_crash_monday = create(:passenger_crash_monday,
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @supportbee)
-      @ruby_5_0_not_supported = create(:ruby_5_0_not_supported,
+      @bundle_install_error = create(:bundle_install_error,
         support_source: @supportbee)
-      @npm_package_needed = create(:npm_package_needed,
+      @apt_repo_down = create(:apt_repo_down,
         support_source: @supportbee)
-      @off_by_one_bug = create(:off_by_one_bug,
+      @yum_repo_signature_error = create(:yum_repo_signature_error,
         support_source: @supportbee)
 
-      stub = stub_request(:get, api_endpoint).
-        to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-          body: '[]')
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array([]))
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
 
-      assert_requested(stub)
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
       expect(Ticket.count).to eq(0)
     end
 
-    it 'creates internal tickets for not-seen-beofre unanswered Supportbee tickets' do
+    it 'creates internal tickets for not-seen-before unanswered Supportbee tickets' do
       create_dependencies
-      @passenger_crash_monday = create(:passenger_crash_monday,
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @supportbee)
 
-      stubbed_body = tickets_as_json(@passenger_crash_monday) + [
-        {
-          'id' => 1,
-          'number' => 1,
-          'title' => 'New ticket 1'
-        },
-        {
-          'id' => 2,
-          'number' => 2,
-          'title' => 'New ticket 2'
-        }
-      ]
-      stub = stub_request(:get, api_endpoint).
-        to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-          body: stubbed_body.to_json)
+      stubbed_body = make_tickets_array(
+        ticket_as_json(@frequent_memory_warnings, false),
+        ticket_as_json({
+          id: 1,
+          number: 1,
+          subject: 'New ticket 1'
+        }, false),
+        ticket_as_json({
+          id: 2,
+          number: 2,
+          subject: 'New ticket 2'
+        }, false),
+        ticket_as_json({
+          id: 3,
+          number: 3,
+          subject: 'New ticket 3'
+        }, true)
+      )
+      stub1 = stub_supportbee_request('assigned_user=none',
+        stubbed_body)
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
 
-      assert_requested(stub)
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+
       expect(Ticket.count).to eq(3)
-      expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
+      expect(Ticket.exists?(@frequent_memory_warnings.id)).to be_truthy
 
       ticket1 = Ticket.where(external_id: '1').first
       expect(ticket1.title).to eq('New ticket 1')
@@ -134,63 +197,69 @@ describe SupportbeeAnalyzer do
 
     it 'does not touch existing tickets for unanswered Supportbee tickets' do
       create_dependencies
-      @passenger_crash_monday = create(:passenger_crash_monday,
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @supportbee)
-      @ruby_5_0_not_supported = create(:ruby_5_0_not_supported,
+      @bundle_install_error = create(:bundle_install_error,
         support_source: @supportbee)
-      @npm_package_needed = create(:npm_package_needed,
+      @apt_repo_down = create(:apt_repo_down,
         support_source: @supportbee)
-      @off_by_one_bug = create(:off_by_one_bug,
+      @yum_repo_signature_error = create(:yum_repo_signature_error,
         support_source: @supportbee)
 
-      stubbed_body = tickets_as_json(@passenger_crash_monday,
-        @ruby_5_0_not_supported, @npm_package_needed,
-        @off_by_one_bug)
-      stub = stub_request(:get, api_endpoint).
-        to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-          body: stubbed_body.to_json)
+      stubbed_body = make_tickets_array(
+        ticket_as_json(@frequent_memory_warnings, false),
+        ticket_as_json(@bundle_install_error, false),
+        ticket_as_json(@apt_repo_down, false),
+        ticket_as_json(@yum_repo_signature_error, false)
+      )
+      stub1 = stub_supportbee_request('assigned_user=none',
+        stubbed_body)
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
 
-      assert_requested(stub)
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
       expect(Ticket.count).to eq(4)
-      expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
-      expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_truthy
-      expect(Ticket.exists?(@npm_package_needed.id)).to be_truthy
-      expect(Ticket.exists?(@off_by_one_bug.id)).to be_truthy
+      expect(Ticket.exists?(@frequent_memory_warnings.id)).to be_truthy
+      expect(Ticket.exists?(@bundle_install_error.id)).to be_truthy
+      expect(Ticket.exists?(@apt_repo_down.id)).to be_truthy
+      expect(Ticket.exists?(@yum_repo_signature_error.id)).to be_truthy
     end
 
     it 'does not touch tickets not belonging to SupportbeeSupportSource' do
       create_dependencies
       @github = create(:github_passenger, user: @user)
-      @passenger_crash_monday = create(:passenger_crash_monday,
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @github)
-      @ruby_5_0_not_supported = create(:ruby_5_0_not_supported,
+      @bundle_install_error = create(:bundle_install_error,
         support_source: @supportbee)
-      @npm_package_needed = create(:npm_package_needed,
+      @apt_repo_down = create(:apt_repo_down,
         support_source: @github)
-      @off_by_one_bug = create(:off_by_one_bug,
+      @yum_repo_signature_error = create(:yum_repo_signature_error,
         support_source: @supportbee)
 
-      stubbed_body = {
-        'total' => 0,
-        'current_page' => 1,
-        'per_page' => 10,
-        'total_pages' => 1,
-        'tickets' => []
-      }
-      stub = stub_request(:get, api_endpoint).
-        to_return(status: 200, headers: { 'Content-Type': 'application/json' },
-          body: stubbed_body.to_json)
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array([]))
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
 
-      assert_requested(stub)
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
       expect(Ticket.count).to eq(2)
-      expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
-      expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_falsey
-      expect(Ticket.exists?(@npm_package_needed.id)).to be_truthy
-      expect(Ticket.exists?(@off_by_one_bug.id)).to be_falsey
+      expect(Ticket.exists?(@frequent_memory_warnings.id)).to be_truthy
+      expect(Ticket.exists?(@bundle_install_error.id)).to be_falsey
+      expect(Ticket.exists?(@apt_repo_down.id)).to be_truthy
+      expect(Ticket.exists?(@yum_repo_signature_error.id)).to be_falsey
     end
   end
 
@@ -220,56 +289,56 @@ describe SupportbeeAnalyzer do
       do
         # API requests for Hongli
         stub_supportbee_request('assigned_user=none',
-          tickets_as_json([]).to_json,
+          make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
-        stubbed_body = tickets_as_json(
-          {
-            'id' => 600,
-            'subject' => 'Frequent memory warnings',
-            'current_assignee' => { 'user' => {
-              'id' => @supportbee_hongli.supportbee_user_id
+        stubbed_body = make_tickets_array(
+          ticket_as_json({
+            id: 600,
+            subject: 'Frequent memory warnings',
+            current_assignee: { user: {
+              id: @supportbee_hongli.supportbee_user_id
             } }
-          },
-          {
-            'id' => 601,
-            'subject' => 'Bundle install error',
-            'current_assignee' => { 'user' => {
-              'id' => @supportbee_hongli.supportbee_user_id
+          }, false),
+          ticket_as_json({
+            id: 601,
+            subject: 'Bundle install error',
+            current_assignee: { user: {
+              id: @supportbee_hongli.supportbee_user_id
             } }
-          }
+          }, false)
         )
         stub_supportbee_request('assigned_user=me',
-          stubbed_body.to_json,
+          stubbed_body,
           @supportbee_hongli.supportbee_auth_token)
         stub_supportbee_request('assigned_group=mine',
-          tickets_as_json([]).to_json,
+          make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
 
         # API requests for Tinco
         stub_supportbee_request('assigned_user=none',
-          tickets_as_json([]).to_json,
+          make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
-        stubbed_body = tickets_as_json(
-          {
-            'id' => 610,
-            'subject' => 'Metrics frontend crashes',
-            'current_assignee' => { 'user' => {
-              'id' => @supportbee_tinco.supportbee_user_id
+        stubbed_body = make_tickets_array(
+          ticket_as_json({
+            id: 610,
+            subject: 'Metrics frontend crashes',
+            current_assignee: { user: {
+              id: @supportbee_tinco.supportbee_user_id
             } }
-          },
-          {
-            'id' => 611,
-            'subject' => 'Indexer protocol change',
-            'current_assignee' => { 'user' => {
-              'id' => @supportbee_tinco.supportbee_user_id
+          }, false),
+          ticket_as_json({
+            id: 611,
+            subject: 'Indexer protocol change',
+            current_assignee: { user: {
+              id: @supportbee_tinco.supportbee_user_id
             } }
-          }
+          }, false)
         )
         stub_supportbee_request('assigned_user=me',
-          stubbed_body.to_json,
+          stubbed_body,
           @supportbee_tinco.supportbee_auth_token)
         stub_supportbee_request('assigned_group=mine',
-          tickets_as_json([]).to_json,
+          make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
 
         SupportbeeAnalyzer.new.analyze
@@ -293,60 +362,66 @@ describe SupportbeeAnalyzer do
          'matching the assigned group' \
       do
         # API requests for Hongli
-        stub_supportbee_request('assigned_user=none',
-          tickets_as_json([]).to_json,
+        stub1 = stub_supportbee_request('assigned_user=none',
+          make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
-        stub_supportbee_request('assigned_user=me',
-          tickets_as_json([]).to_json,
+        stub2 = stub_supportbee_request('assigned_user=me',
+          make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
-        stubbed_body = tickets_as_json(
-          {
-            'id' => 600,
-            'subject' => 'Frequent memory warnings',
-            'current_assignee' => { 'group' => {
-              'id' => passenger_group
+        stubbed_body = make_tickets_array(
+          ticket_as_json({
+            id: 600,
+            subject: 'Frequent memory warnings',
+            current_assignee: { group: {
+              id: passenger_group
             } }
-          },
-          {
-            'id' => 601,
-            'subject' => 'Bundle install error',
-            'current_assignee' => { 'group' => {
-              'id' => passenger_group
+          }, false),
+          ticket_as_json({
+            id: 601,
+            subject: 'Bundle install error',
+            current_assignee: { group: {
+              id: passenger_group
             } }
-          }
+          }, false)
         )
-        stub_supportbee_request('assigned_group=mine',
-          stubbed_body.to_json,
+        stub3 = stub_supportbee_request('assigned_group=mine',
+          stubbed_body,
           @supportbee_hongli.supportbee_auth_token)
 
         # API requests for Tinco
-        stub_supportbee_request('assigned_user=none',
-          tickets_as_json([]).to_json,
+        stub4 = stub_supportbee_request('assigned_user=none',
+          make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
-        stub_supportbee_request('assigned_user=me',
-          tickets_as_json([]).to_json,
+        stub5 = stub_supportbee_request('assigned_user=me',
+          make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
-        stubbed_body = tickets_as_json(
-          {
-            'id' => 610,
-            'subject' => 'Metrics frontend crashes',
-            'current_assignee' => { 'group' => {
-              'id' => union_station_group
+        stubbed_body = make_tickets_array(
+          ticket_as_json({
+            id: 610,
+            subject: 'Metrics frontend crashes',
+            current_assignee: { group: {
+              id: union_station_group
             } }
-          },
-          {
-            'id' => 611,
-            'subject' => 'Indexer protocol change',
-            'current_assignee' => { 'group' => {
-              'id' => union_station_group
+          }, false),
+          ticket_as_json({
+            id: 611,
+            subject: 'Indexer protocol change',
+            current_assignee: { group: {
+              id: union_station_group
             } }
-          }
+          }, false)
         )
-        stub_supportbee_request('assigned_group=mine',
-          stubbed_body.to_json,
+        stub6 = stub_supportbee_request('assigned_group=mine',
+          stubbed_body,
           @supportbee_tinco.supportbee_auth_token)
 
         SupportbeeAnalyzer.new.analyze
+        assert_requested(stub1)
+        assert_requested(stub2)
+        assert_requested(stub3)
+        assert_requested(stub4)
+        assert_requested(stub5)
+        assert_requested(stub6)
         expect(Ticket.count).to eq(6)
         expect(Ticket.where(title: 'Frequent memory warnings').count).to eq(2)
         expect(Ticket.where(title: 'Bundle install error').count).to eq(2)
@@ -370,48 +445,54 @@ describe SupportbeeAnalyzer do
          'if the Supportbee ticket is not assigned' \
       do
         # API requests for Hongli
-        stubbed_body = tickets_as_json(
-          {
-            'id' => 600,
-            'subject' => 'Frequent memory warnings'
-          },
-          {
-            'id' => 601,
-            'subject' => 'Bundle install error'
-          }
+        stubbed_body = make_tickets_array(
+          ticket_as_json({
+            id: 600,
+            subject: 'Frequent memory warnings'
+          }, false),
+          ticket_as_json({
+            id: 601,
+            subject: 'Bundle install error'
+          }, false)
         )
-        stub_supportbee_request('assigned_user=none',
-          stubbed_body.to_json,
+        stub1 = stub_supportbee_request('assigned_user=none',
+          stubbed_body,
           @supportbee_hongli.supportbee_auth_token)
-        stub_supportbee_request('assigned_user=me',
-          tickets_as_json([]).to_json,
+        stub2 = stub_supportbee_request('assigned_user=me',
+          make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
-        stub_supportbee_request('assigned_group=mine',
-          tickets_as_json([]).to_json,
+        stub3 = stub_supportbee_request('assigned_group=mine',
+          make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
 
         # API requests for Tinco
-        stubbed_body = tickets_as_json(
-          {
-            'id' => 610,
-            'subject' => 'Metrics frontend crashes'
-          },
-          {
-            'id' => 611,
-            'subject' => 'Indexer protocol change'
-          }
+        stubbed_body = make_tickets_array(
+          ticket_as_json({
+            id: 610,
+            subject: 'Metrics frontend crashes'
+          }, false),
+          ticket_as_json({
+            id: 611,
+            subject: 'Indexer protocol change'
+          }, false)
         )
-        stub_supportbee_request('assigned_user=none',
-          stubbed_body.to_json,
+        stub4 = stub_supportbee_request('assigned_user=none',
+          stubbed_body,
           @supportbee_tinco.supportbee_auth_token)
-        stub_supportbee_request('assigned_user=me',
-          tickets_as_json([]).to_json,
+        stub5 = stub_supportbee_request('assigned_user=me',
+          make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
-        stub_supportbee_request('assigned_group=mine',
-          tickets_as_json([]).to_json,
+        stub6 = stub_supportbee_request('assigned_group=mine',
+          make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
 
         SupportbeeAnalyzer.new.analyze
+        assert_requested(stub1)
+        assert_requested(stub2)
+        assert_requested(stub3)
+        assert_requested(stub4)
+        assert_requested(stub5)
+        assert_requested(stub6)
         expect(Ticket.count).to eq(8)
         expect(Ticket.where(title: 'Frequent memory warnings').count).to eq(2)
         expect(Ticket.where(title: 'Bundle install error').count).to eq(2)

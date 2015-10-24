@@ -96,10 +96,10 @@ RSpec.describe Webhooks::GithubWebhookController, type: :controller do
       expect(response.status).to eq(200)
     end
 
-    it 'adds the "unanswered" label otherwise' do
+    it 'adds the "Unanswered" label otherwise' do
       stub = stub_request(:patch,
             'https://api.github.com/repos/phusion/passenger/issues/1234').
-          with(body: '{"labels":"usability,documentation,unanswered"}').
+          with(body: '{"labels":"usability,documentation,Unanswered"}').
           to_return(status: 200, body: 'ok')
 
       post_json_with_signature(:issues,
@@ -119,17 +119,17 @@ RSpec.describe Webhooks::GithubWebhookController, type: :controller do
     end
 
     context 'if the sender is a Phusion user' do
-      it 'does nothing if the issue did not have an "unanswered" label' do
+      it 'does nothing if the issue did not have an "Unanswered" label' do
         post_json_with_signature(:issue_comment,
           body_issue_comment_created_by_phusion_user)
         expect(response.status).to eq(200)
       end
 
-      it 'removes the "unanswered" label otherwise' do
+      it 'removes the "Unanswered" label otherwise' do
         body = body_issue_comment_created_by_phusion_user.dup
         body[:issue][:labels] = [
           { name: 'security' },
-          { name: 'unanswered' },
+          { name: 'Unanswered' },
           { name: 'priority/high' }
         ]
 
@@ -145,18 +145,18 @@ RSpec.describe Webhooks::GithubWebhookController, type: :controller do
     end
 
     context 'if the sender is not a Phusion user' do
-      it 'does nothing if the issue already has an "unanswered" label' do
+      it 'does nothing if the issue already has an "Unanswered" label' do
         body = body_issue_comment_not_created_by_phusion_user.dup
         body[:issue][:labels] = [
           { name: 'security' },
-          { name: 'unanswered' },
+          { name: 'Unanswered' },
           { name: 'priority/high' }
         ]
         post_json_with_signature(:issue_comment, body)
         expect(response.status).to eq(200)
       end
 
-      it 'adds the "unanswered" label otherwise' do
+      it 'adds the "Unanswered" label otherwise' do
         body = body_issue_comment_not_created_by_phusion_user.dup
         body[:issue][:labels] = [
           { name: 'security' },
@@ -165,7 +165,7 @@ RSpec.describe Webhooks::GithubWebhookController, type: :controller do
 
         stub = stub_request(:patch,
             'https://api.github.com/repos/phusion/passenger/issues/1234').
-          with(body: '{"labels":"security,priority/high,unanswered"}').
+          with(body: '{"labels":"security,priority/high,Unanswered"}').
           to_return(status: 200, body: 'ok')
 
         post_json_with_signature(:issue_comment, body)

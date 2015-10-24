@@ -39,11 +39,11 @@ private
   end
 
   def add_unanswered_label
-    update_labels((current_label_names + ['unanswered']).uniq)
+    update_labels((current_label_names + ['Unanswered']).uniq)
   end
 
   def remove_unanswered_label
-    update_labels((current_label_names - ['unanswered']))
+    update_labels(current_label_names - ['Unanswered'])
   end
 
   def current_label_names
