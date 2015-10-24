@@ -19,9 +19,8 @@ describe SupportbeeAnalyzer do
 
   def ticket_as_json(ticket, answered)
     if !ticket.is_a?(Hash)
-      ticket.external_id =~ /(\d+)$/
       ticket = {
-        id: $1.to_i,
+        id: ticket.external_id.to_i,
         subject: ticket.title,
         labels: []
       }
@@ -160,17 +159,20 @@ describe SupportbeeAnalyzer do
         ticket_as_json({
           id: 1,
           number: 1,
-          subject: 'New ticket 1'
+          subject: 'New ticket 1',
+          labels: [ { name: 'foo' } ]
         }, false),
         ticket_as_json({
           id: 2,
           number: 2,
-          subject: 'New ticket 2'
+          subject: 'New ticket 2',
+          labels: [ { name: 'bar' } ]
         }, false),
         ticket_as_json({
           id: 3,
           number: 3,
-          subject: 'New ticket 3'
+          subject: 'New ticket 3',
+          labels: [ { name: 'baz' } ]
         }, true)
       )
       stub1 = stub_supportbee_request('assigned_user=none',
@@ -191,9 +193,11 @@ describe SupportbeeAnalyzer do
 
       ticket1 = Ticket.where(external_id: '1').first
       expect(ticket1.title).to eq('New ticket 1')
+      expect(ticket1.labels).to eq(['foo'])
 
       ticket2 = Ticket.where(external_id: '2').first
       expect(ticket2.title).to eq('New ticket 2')
+      expect(ticket2.labels).to eq(['bar'])
     end
 
     it 'does not touch existing tickets for unanswered Supportbee tickets' do
@@ -362,6 +366,34 @@ describe SupportbeeAnalyzer do
       @frequent_memory_warnings.reload
       expect(@frequent_memory_warnings.status).to eq('normal')
     end
+
+    it "saves the Supportbee's ticket's labels except for 'respond now' and 'overdue'" do
+      create_dependencies
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        support_source: @supportbee)
+
+      json = ticket_as_json(@frequent_memory_warnings, false)
+      json[:labels] = [
+        { name: 'silver' },
+        { name: 'passenger' },
+        { name: 'overdue' },
+        { name: 'respond now' }
+      ]
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(json))
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]))
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([]))
+
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+      @frequent_memory_warnings.reload
+      expect(@frequent_memory_warnings.labels).to eq(['silver', 'passenger'])
+    end
   end
 
   context 'when there are two support sources with both distinct and overlapping groups' do
@@ -396,6 +428,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 600,
             subject: 'Frequent memory warnings',
+            labels: [],
             current_assignee: { user: {
               id: @supportbee_hongli.supportbee_user_id
             } }
@@ -403,6 +436,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 601,
             subject: 'Bundle install error',
+            labels: [],
             current_assignee: { user: {
               id: @supportbee_hongli.supportbee_user_id
             } }
@@ -423,6 +457,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 610,
             subject: 'Metrics frontend crashes',
+            labels: [],
             current_assignee: { user: {
               id: @supportbee_tinco.supportbee_user_id
             } }
@@ -430,6 +465,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 611,
             subject: 'Indexer protocol change',
+            labels: [],
             current_assignee: { user: {
               id: @supportbee_tinco.supportbee_user_id
             } }
@@ -473,6 +509,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 600,
             subject: 'Frequent memory warnings',
+            labels: [],
             current_assignee: { group: {
               id: passenger_group
             } }
@@ -480,6 +517,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 601,
             subject: 'Bundle install error',
+            labels: [],
             current_assignee: { group: {
               id: passenger_group
             } }
@@ -500,6 +538,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 610,
             subject: 'Metrics frontend crashes',
+            labels: [],
             current_assignee: { group: {
               id: union_station_group
             } }
@@ -507,6 +546,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 611,
             subject: 'Indexer protocol change',
+            labels: [],
             current_assignee: { group: {
               id: union_station_group
             } }
@@ -549,11 +589,13 @@ describe SupportbeeAnalyzer do
         stubbed_body = make_tickets_array(
           ticket_as_json({
             id: 600,
-            subject: 'Frequent memory warnings'
+            subject: 'Frequent memory warnings',
+            labels: []
           }, false),
           ticket_as_json({
             id: 601,
-            subject: 'Bundle install error'
+            subject: 'Bundle install error',
+            labels: []
           }, false)
         )
         stub1 = stub_supportbee_request('assigned_user=none',
@@ -570,11 +612,13 @@ describe SupportbeeAnalyzer do
         stubbed_body = make_tickets_array(
           ticket_as_json({
             id: 610,
-            subject: 'Metrics frontend crashes'
+            subject: 'Metrics frontend crashes',
+            labels: []
           }, false),
           ticket_as_json({
             id: 611,
-            subject: 'Indexer protocol change'
+            subject: 'Indexer protocol change',
+            labels: []
           }, false)
         )
         stub4 = stub_supportbee_request('assigned_user=none',
@@ -588,12 +632,14 @@ describe SupportbeeAnalyzer do
           @supportbee_tinco.supportbee_auth_token)
 
         SupportbeeAnalyzer.new.analyze
+
         assert_requested(stub1)
         assert_requested(stub2)
         assert_requested(stub3)
         assert_requested(stub4)
         assert_requested(stub5)
         assert_requested(stub6)
+
         expect(Ticket.count).to eq(8)
         expect(Ticket.where(title: 'Frequent memory warnings').count).to eq(2)
         expect(Ticket.where(title: 'Bundle install error').count).to eq(2)

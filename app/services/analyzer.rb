@@ -39,8 +39,9 @@ protected
     raise NotImplementedError
   end
 
-  def title_for_external_ticket(external_ticket)
-    raise NotImplementedError
+  def synchronize_internal_ticket(internal_ticket, external_ticket)
+    internal_ticket.external_id ||= id_for_external_ticket(external_ticket)
+    internal_ticket.external_last_update_time ||= Time.now
   end
 
   def support_sources_eligible_for_external_ticket(external_ticket)
@@ -86,13 +87,12 @@ private
   end
 
   def update_internal_tickets_based_on_external_tickets
-    if respond_to?(:update_internal_ticket, true)
-      internal_tickets = Ticket.where(support_source_id: @support_source_ids)
-      internal_tickets.each do |internal_ticket|
-        external_ticket = @unanswered_external_tickets_index[
-          internal_ticket.external_id]
-        update_internal_ticket(internal_ticket, external_ticket)
-      end
+    internal_tickets = Ticket.where(support_source_id: @support_source_ids)
+    internal_tickets.each do |internal_ticket|
+      external_ticket = @unanswered_external_tickets_index[
+        internal_ticket.external_id]
+      synchronize_internal_ticket(internal_ticket, external_ticket)
+      internal_ticket.save!
     end
   end
 
@@ -118,10 +118,10 @@ private
       external_ticket = @unanswered_external_tickets_index[external_ticket_id]
       support_sources = support_sources_eligible_for_external_ticket(external_ticket)
       support_sources.each do |support_source|
-        support_source.tickets.create!(
-          title: title_for_external_ticket(external_ticket),
-          external_id: id_for_external_ticket(external_ticket)
-        )
+        internal_ticket = support_source.tickets.build
+        internal_ticket.external_id = id_for_external_ticket(external_ticket)
+        synchronize_internal_ticket(internal_ticket, external_ticket)
+        internal_ticket.save!
       end
     end
   end

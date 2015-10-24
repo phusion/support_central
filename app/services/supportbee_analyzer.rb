@@ -32,8 +32,25 @@ protected
     external_ticket['id'].to_s
   end
 
-  def title_for_external_ticket(external_ticket)
-    external_ticket['subject']
+  def synchronize_internal_ticket(internal_ticket, external_ticket)
+    super
+
+    internal_ticket.title = external_ticket['subject']
+
+    labels = external_ticket['labels'].map { |l| l['name'] }
+    if labels.include?('overdue')
+      internal_ticket.status = 'overdue'
+    elsif labels.include?('respond now')
+      internal_ticket.status = 'respond_now'
+    else
+      internal_ticket.status = 'normal'
+    end
+
+    internal_ticket.labels = external_ticket['labels'].map do |label|
+      label['name']
+    end
+    internal_ticket.labels.delete('overdue')
+    internal_ticket.labels.delete('respond now')
   end
 
   def support_sources_eligible_for_external_ticket(external_ticket)
@@ -52,20 +69,6 @@ protected
       end
     else
       @support_sources
-    end
-  end
-
-  def update_internal_ticket(internal_ticket, external_ticket)
-    labels = external_ticket['labels'].map { |l| l['name'] }
-    if labels.include?('overdue')
-      new_status = 'overdue'
-    elsif labels.include?('respond now')
-      new_status = 'respond_now'
-    else
-      new_status = 'normal'
-    end
-    if internal_ticket.status != new_status
-      internal_ticket.update_attribute(:status, new_status)
     end
   end
 
