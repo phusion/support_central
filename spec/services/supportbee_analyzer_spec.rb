@@ -54,18 +54,21 @@ describe SupportbeeAnalyzer do
       @apache_uploads_fail = create(:apache_uploads_fail,
         support_source: @supportbee)
 
-      stub_request(:get, api_endpoint_none_assigned).
+      stub1 = stub_request(:get, api_endpoint_none_assigned).
         to_return(status: 200, headers: { 'Content-Type': 'application/json' },
           body: tickets_as_json(@ruby_5_0_not_supported).to_json)
-      stub_request(:get, api_endpoint_me_assigned).
+      stub2 = stub_request(:get, api_endpoint_me_assigned).
         to_return(status: 200, headers: { 'Content-Type': 'application/json' },
           body: tickets_as_json(@npm_package_needed).to_json)
-      stub_request(:get, api_endpoint_my_groups_assigned).
+      stub3 = stub_request(:get, api_endpoint_my_groups_assigned).
         to_return(status: 200, headers: { 'Content-Type': 'application/json' },
           body: tickets_as_json(@off_by_one_bug).to_json)
 
       SupportbeeAnalyzer.new.analyze
 
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
       expect(Ticket.count).to eq(3)
       expect(Ticket.exists?(@passenger_crash_monday.id)).to be_falsey
       expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_truthy
@@ -85,12 +88,13 @@ describe SupportbeeAnalyzer do
       @off_by_one_bug = create(:off_by_one_bug,
         support_source: @supportbee)
 
-      stub_request(:get, api_endpoint).
+      stub = stub_request(:get, api_endpoint).
         to_return(status: 200, headers: { 'Content-Type': 'application/json' },
           body: '[]')
 
       SupportbeeAnalyzer.new.analyze
 
+      assert_requested(stub)
       expect(Ticket.count).to eq(0)
     end
 
@@ -111,12 +115,13 @@ describe SupportbeeAnalyzer do
           'title' => 'New ticket 2'
         }
       ]
-      stub_request(:get, api_endpoint).
+      stub = stub_request(:get, api_endpoint).
         to_return(status: 200, headers: { 'Content-Type': 'application/json' },
           body: stubbed_body.to_json)
 
       SupportbeeAnalyzer.new.analyze
 
+      assert_requested(stub)
       expect(Ticket.count).to eq(3)
       expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
 
@@ -141,12 +146,13 @@ describe SupportbeeAnalyzer do
       stubbed_body = tickets_as_json(@passenger_crash_monday,
         @ruby_5_0_not_supported, @npm_package_needed,
         @off_by_one_bug)
-      stub_request(:get, api_endpoint).
+      stub = stub_request(:get, api_endpoint).
         to_return(status: 200, headers: { 'Content-Type': 'application/json' },
           body: stubbed_body.to_json)
 
       SupportbeeAnalyzer.new.analyze
 
+      assert_requested(stub)
       expect(Ticket.count).to eq(4)
       expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
       expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_truthy
@@ -173,12 +179,13 @@ describe SupportbeeAnalyzer do
         'total_pages' => 1,
         'tickets' => []
       }
-      stub_request(:get, api_endpoint).
+      stub = stub_request(:get, api_endpoint).
         to_return(status: 200, headers: { 'Content-Type': 'application/json' },
           body: stubbed_body.to_json)
 
       SupportbeeAnalyzer.new.analyze
 
+      assert_requested(stub)
       expect(Ticket.count).to eq(2)
       expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
       expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_falsey

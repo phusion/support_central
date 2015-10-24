@@ -2,8 +2,10 @@ class Webhooks::GithubWebhookController < ApplicationController
   skip_before_action :authenticate_user!
   skip_before_action :verify_authenticity_token
 
-  def github
+  def hook
     authenticate_github_request!
+    return if performed?
+
     if event == :issues
       handle_issue_event
     elsif event == :issue_comment
@@ -32,25 +34,29 @@ private
   end
 
   def sender_is_from_phusion?
-    CONFIG['phusion_github_usernames'].include?(json_body['sender']['login'].downcase)
+    CONFIG['phusion_github_usernames_downcased'].
+      include?(json_body['sender']['login'].downcase)
   end
 
   def add_unanswered_label
-    set_labels((label_names + ['unanswered']).uniq.join(','))
+    update_labels((current_label_names + ['unanswered']).uniq)
   end
 
   def remove_unanswered_label
-    set_labels((label_names - ['unanswered']).join(','))
+    update_labels((current_label_names - ['unanswered']))
   end
 
-  def label_names
-    json_body['issue']['labels'].map { |l| l['name'] }
+  def current_label_names
+    labels = json_body['issue']['labels'] || []
+    labels.map { |l| l['name'] }
   end
 
-  def set_labels(labels)
-    octokit.update_issue(json_body['repository']['full_name'],
-      json_body['issue']['number'],
-      labels: labels)
+  def update_labels(new_labels)
+    if current_label_names != new_labels
+      octokit.update_issue(json_body['repository']['full_name'],
+        json_body['issue']['number'],
+        labels: new_labels.join(','))
+    end
   end
 
   def authenticate_github_request!
@@ -58,9 +64,10 @@ private
     expected_signature = "sha1=#{OpenSSL::HMAC.hexdigest(HMAC_DIGEST,
       secret, request_body)}"
     if signature_header != expected_signature
-      raise "Github signature mismatch. " \
+      Rails.logger.error 'Github signature mismatch. ' \
         "Actual: #{signature_header}, " \
         "expected: #{expected_signature}"
+      render text: 'Invalid signature', status: 401
     end
   end
 

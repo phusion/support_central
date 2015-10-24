@@ -35,12 +35,13 @@ describe GithubAnalyzer do
       support_source: @github)
 
     stubbed_body = tickets_as_json(@ruby_5_0_not_supported, @npm_package_needed)
-    stub_request(:get, api_endpoint).
+    stub = stub_request(:get, api_endpoint).
       to_return(status: 200, headers: { 'Content-Type': 'application/json' },
         body: stubbed_body.to_json)
 
     GithubAnalyzer.new.analyze
 
+    assert_requested(stub)
     expect(Ticket.count).to eq(2)
     expect(Ticket.exists?(@passenger_crash_monday.id)).to be_falsey
     expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_truthy
@@ -59,12 +60,13 @@ describe GithubAnalyzer do
     @off_by_one_bug = create(:off_by_one_bug,
       support_source: @github)
 
-    stub_request(:get, api_endpoint).
+    stub = stub_request(:get, api_endpoint).
       to_return(status: 200, headers: { 'Content-Type': 'application/json' },
         body: '[]')
 
     GithubAnalyzer.new.analyze
 
+    assert_requested(stub)
     expect(Ticket.count).to eq(0)
   end
 
@@ -87,12 +89,13 @@ describe GithubAnalyzer do
         'html_url' => 'https://github.com/phusion/passenger/issues/2'
       }
     ]
-    stub_request(:get, api_endpoint).
+    stub = stub_request(:get, api_endpoint).
       to_return(status: 200, headers: { 'Content-Type': 'application/json' },
         body: stubbed_body.to_json)
 
     GithubAnalyzer.new.analyze
 
+    assert_requested(stub)
     expect(Ticket.count).to eq(3)
     expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
 
@@ -119,12 +122,13 @@ describe GithubAnalyzer do
     stubbed_body = tickets_as_json(@passenger_crash_monday,
       @ruby_5_0_not_supported, @npm_package_needed,
       @off_by_one_bug)
-    stub_request(:get, api_endpoint).
+    stub = stub_request(:get, api_endpoint).
       to_return(status: 200, headers: { 'Content-Type': 'application/json' },
         body: stubbed_body.to_json)
 
     GithubAnalyzer.new.analyze
 
+    assert_requested(stub)
     expect(Ticket.count).to eq(4)
     expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
     expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_truthy
@@ -144,12 +148,13 @@ describe GithubAnalyzer do
     @off_by_one_bug = create(:off_by_one_bug,
       support_source: @github)
 
-    stub_request(:get, api_endpoint).
+    stub = stub_request(:get, api_endpoint).
       to_return(status: 200, headers: { 'Content-Type': 'application/json' },
         body: '[]')
 
     GithubAnalyzer.new.analyze
 
+    assert_requested(stub)
     expect(Ticket.count).to eq(2)
     expect(Ticket.exists?(@passenger_crash_monday.id)).to be_truthy
     expect(Ticket.exists?(@ruby_5_0_not_supported.id)).to be_falsey
