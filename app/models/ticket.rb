@@ -5,10 +5,12 @@
 #  id                        :integer          not null, primary key
 #  support_source_id         :integer          not null
 #  title                     :string           not null
-#  labels                    :text             default([]), is an Array
-#  external_id               :string
-#  external_last_update_time :datetime         not null
 #  status                    :integer          default(0), not null
+#  labels                    :text             default([]), is an Array
+#  display_id                :string           not null
+#  data                      :text
+#  external_id               :string           not null
+#  external_last_update_time :datetime         not null
 #  created_at                :datetime         not null
 #  updated_at                :datetime         not null
 #
@@ -20,7 +22,15 @@
 class Ticket < ActiveRecord::Base
   enum status: { normal: 0, respond_now: 1, overdue: 2 }
 
+  def display_id_with_hash_prefix
+    result = display_id
+    if result =~ /^\d/
+      result = "##{result}"
+    end
+    result
+  end
+
   def external_url
-    support_source.ticket_url(self)
+    support_source.external_url(self)
   end
 end

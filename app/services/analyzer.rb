@@ -40,6 +40,7 @@ protected
   end
 
   def synchronize_internal_ticket(internal_ticket, external_ticket)
+    internal_ticket.display_id ||= id_for_external_ticket(external_ticket)
     internal_ticket.external_id ||= id_for_external_ticket(external_ticket)
     internal_ticket.external_last_update_time ||= Time.now
   end

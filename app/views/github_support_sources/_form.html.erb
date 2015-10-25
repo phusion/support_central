@@ -1,0 +1,29 @@
+<%= form_for(@support_source) do |f| %>
+    <% if @support_source.errors.any? %>
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title"><%= pluralize(@support_source.errors.count, "error") %> prohibited this support source from being saved</h3>
+        </div>
+        <div class="panel-body">
+            <% @support_source.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+            <% end %>
+            </ul>
+        </div>
+    </div>
+    <% end %>
+
+    <div class="form-group">
+        <%= f.label :name %>
+        <%= f.text_field :name, class: 'form-control' %>
+    </div>
+
+    <div class="form-group">
+        <%= f.label :github_owner_and_repo %>
+        <%= f.text_field :github_owner_and_repo, placeholder: 'phusion/passenger', class: 'form-control' %>
+    </div>
+
+    <div class="actions">
+        <p><%= f.submit class: 'btn btn-primary' %></p>
+    </div>
+<% end %>

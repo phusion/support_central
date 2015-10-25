@@ -16,7 +16,8 @@
 #
 # Indexes
 #
-#  fk__support_sources_user_id  (user_id)
+#  fk__support_sources_user_id                (user_id)
+#  index_support_sources_on_user_id_and_name  (user_id,name) UNIQUE
 #
 
 require 'rails_helper'

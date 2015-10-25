@@ -16,13 +16,22 @@
 #
 # Indexes
 #
-#  fk__support_sources_user_id  (user_id)
+#  fk__support_sources_user_id                (user_id)
+#  index_support_sources_on_user_id_and_name  (user_id,name) UNIQUE
 #
 
 class GithubSupportSource < SupportSource
   validates :github_owner_and_repo, presence: true
 
-  def ticket_url(ticket)
-    "https://github.com/#{github_owner_and_repo}/issues/#{ticket.external_id}"
+  default_value_for :name, 'Github'
+
+  def external_url(ticket)
+    "https://github.com/#{github_owner_and_repo}/issues/#{github_issue_id(ticket)}"
+  end
+
+private
+  def github_issue_id(ticket)
+    ticket.external_id =~ /(\d+)$/
+    $1.to_i
   end
 end

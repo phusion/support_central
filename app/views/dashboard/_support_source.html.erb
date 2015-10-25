@@ -1,0 +1,11 @@
+<div role="tabpanel" class="tab-pane support-source <%= 'active' if support_source_counter == 0 %>" id="support_source_<%= support_source.id %>">
+    <% if support_source.tickets.empty? %>
+        <div class="intro-text intro-text-with-margin">
+            <p>Hurray, there are no open support tickets for this source. :-)</p>
+        </div>
+    <% else %>
+        <ul class="list-unstyled">
+            <%= render partial: 'ticket', collection: support_source.tickets %>
+        </ul>
+    <% end %>
+</div>

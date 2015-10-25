@@ -194,10 +194,14 @@ describe SupportbeeAnalyzer do
       ticket1 = Ticket.where(external_id: '1').first
       expect(ticket1.title).to eq('New ticket 1')
       expect(ticket1.labels).to eq(['foo'])
+      expect(ticket1.display_id).to eq('1')
+      expect(ticket1.external_id).to eq('1')
 
       ticket2 = Ticket.where(external_id: '2').first
       expect(ticket2.title).to eq('New ticket 2')
       expect(ticket2.labels).to eq(['bar'])
+      expect(ticket2.display_id).to eq('2')
+      expect(ticket2.external_id).to eq('2')
     end
 
     it 'does not touch existing tickets for unanswered Supportbee tickets' do
@@ -405,11 +409,13 @@ describe SupportbeeAnalyzer do
     before :each do
       @user = create(:user)
       @supportbee_hongli = create(:supportbee,
+        name: 'Supportbee Hongli',
         supportbee_auth_token: 'hongli',
         supportbee_user_id: 1234,
         supportbee_group_ids: [traveling_ruby_group, passenger_group, docker_group],
         user: @user)
       @supportbee_tinco = create(:supportbee,
+        name: 'Supportbee Tinco',
         supportbee_auth_token: 'tinco',
         supportbee_user_id: 1235,
         supportbee_group_ids: [passenger_group, docker_group, union_station_group],

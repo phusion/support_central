@@ -38,14 +38,17 @@ ActiveRecord::Schema.define(version: 20151023023026) do
     t.string   "supportbee_user_id"
     t.text     "supportbee_group_ids",  default: [],              array: true
   end
+  add_index "support_sources", ["user_id", "name"], name: "index_support_sources_on_user_id_and_name", unique: true, using: :btree
 
   create_table "tickets", force: :cascade do |t|
     t.integer  "support_source_id",         null: false, foreign_key: {references: "support_sources", name: "fk_tickets_support_source_id", on_update: :cascade, on_delete: :cascade}, index: {name: "fk__tickets_support_source_id", using: :btree}
     t.string   "title",                     null: false
-    t.text     "labels",                    default: [],              array: true
-    t.string   "external_id"
-    t.datetime "external_last_update_time", null: false
     t.integer  "status",                    default: 0,  null: false
+    t.text     "labels",                    default: [],              array: true
+    t.string   "display_id",                null: false
+    t.text     "data"
+    t.string   "external_id",               null: false
+    t.datetime "external_last_update_time", null: false
     t.datetime "created_at",                null: false
     t.datetime "updated_at",                null: false
   end

@@ -16,8 +16,14 @@
 #
 # Indexes
 #
-#  fk__support_sources_user_id  (user_id)
+#  fk__support_sources_user_id                (user_id)
+#  index_support_sources_on_user_id_and_name  (user_id,name) UNIQUE
 #
 
 class SupportSource < ActiveRecord::Base
+  has_many :tickets, -> { order('status, display_id') }, inverse_of: 'support_source'
+
+  def type_name
+    self.class.to_s.sub(/SupportSource$/, '')
+  end
 end

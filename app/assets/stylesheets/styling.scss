@@ -9,6 +9,13 @@ header {
     padding-left: 16px;
 }
 
+footer {
+    margin: 28px auto;
+    padding-left: 16px;
+    text-align: center;
+    color: #999;
+}
+
 .account-actions {
     position: absolute;
     right: 16px;
@@ -27,10 +34,13 @@ header {
 
 @media (min-width: 768px) {
     header {
-        right: 0;
         width: 750px;
         padding-left: 0;
         text-align: center;
+    }
+
+    .account-actions {
+        right: 0;
     }
 
     .container {
@@ -52,4 +62,22 @@ header {
 .container > h2:first-child,
 .first-page-header {
     margin-top: 0;
+}
+
+.intro-text {
+    font-size: 18px;
+    text-align: center;
+    max-width: 70%;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.intro-text-with-margin {
+    margin-top: 1em;
+    margin-bottom: 1em;
+}
+
+.field_with_errors {
+  color: #cc0000;
+  display: inline;
 }

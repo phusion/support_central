@@ -1,0 +1,23 @@
+<li class="ticket">
+    <%= link_to ticket.external_url, target: '_blank', class: 'ticket-link' do %>
+        <span class="arrow" aria-hidden="true">
+            <span class="glyphicon glyphicon-chevron-right"></span>
+        </span>
+        <span class="title">
+            <%= ticket.title %>
+            <% if ticket.status == 'respond_now' %>
+                <span class="label label-warning">respond now</span>
+            <% elsif ticket.status == 'overdue' %>
+                <span class="label label-danger">overdue</span>
+            <% end %>
+            <% ticket.labels.each do |label| %>
+                <span class="label label-info"><%= label %></span>
+            <% end %>
+        </span>
+        <span class="meta">
+            <%= ticket.display_id_with_hash_prefix %>,
+            last update
+            <%= distance_of_time_in_words_to_now(ticket.external_last_update_time) %> ago
+        </span>
+    <% end %>
+</li>

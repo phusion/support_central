@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Support Central</title>
+  <title><%= page_title %></title>
   <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
   <%= csrf_meta_tags %>
 </head>
@@ -10,11 +10,18 @@
     <header>
         <div class="account-actions">
             <% if current_user %>
-                <%= current_user.email %><br><br>
-                <%= link_to 'Admin area', '#' %><br><br>
-                <%= link_to 'Edit profile', edit_user_registration_path %><br>
-                <%= link_to 'Delete account', edit_user_registration_path(anchor: 'delete-my-account') %><br>
-                <%= link_to 'Logout', destroy_user_session_path, method: 'delete' %>
+                <p>
+                    <%= current_user.email %>
+                </p>
+                <p>
+                    <%= link_to 'Admin area', '#' %><br>
+                    <%= link_to 'Support sources', support_sources_path %>
+                </p>
+                <p>
+                    <%= link_to 'Edit profile', edit_user_registration_path %><br>
+                    <%= link_to 'Delete account', edit_user_registration_path(anchor: 'delete-my-account') %><br>
+                    <%= link_to 'Logout', destroy_user_session_path, method: 'delete' %>
+                </p>
             <% else %>
                 <%= link_to 'Login', new_user_session_path %><br>
                 <%= link_to 'Create account', new_user_registration_path %>
@@ -34,6 +41,10 @@
 
         <%= yield %>
     </div>
+
+    <footer>
+        Copyright &copy; 2015 Phusion Holding B.V.
+    </footer>
 
     <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
 

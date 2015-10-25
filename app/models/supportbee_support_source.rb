@@ -16,14 +16,25 @@
 #
 # Indexes
 #
-#  fk__support_sources_user_id  (user_id)
+#  fk__support_sources_user_id                (user_id)
+#  index_support_sources_on_user_id_and_name  (user_id,name) UNIQUE
 #
 
 class SupportbeeSupportSource < SupportSource
   validates :supportbee_company_id, :supportbee_auth_token, :supportbee_user_id,
     :supportbee_group_ids, presence: true
 
-  def ticket_url(ticket)
+  default_value_for :name, 'Supportbee'
+
+  def external_url(ticket)
     "https://#{supportbee_company_id}.supportbee.com/tickets/#{ticket.external_id}"
+  end
+
+  def supportbee_group_ids_as_string
+    supportbee_group_ids.join(',')
+  end
+
+  def supportbee_group_ids_as_string=(value)
+    self.supportbee_group_ids = value.to_s.split(',').reject { |x| x.blank? }
   end
 end

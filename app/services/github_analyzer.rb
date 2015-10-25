@@ -37,9 +37,12 @@ protected
 
   def synchronize_internal_ticket(internal_ticket, external_ticket)
     super
-    internal_ticket.title = external_ticket.title
 
     repo_full_name = extract_repo_full_name(external_ticket.html_url)
+
+    internal_ticket.title = external_ticket.title
+    internal_ticket.display_id = "#{repo_full_name} ##{external_ticket.number}"
+
     comments = @octokit.issue_comments(repo_full_name,
       external_ticket.number)
     internal_ticket.external_last_update_time = comments.last.created_at

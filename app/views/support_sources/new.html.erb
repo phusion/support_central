@@ -1,0 +1,8 @@
+<% @title = 'New support source' %>
+<%= link_to '&laquo; Back to Support sources'.html_safe, support_sources_path %>
+<h1>New support source</h1>
+
+<p>
+    <%= link_to 'Setup a Github support source', new_github_support_source_path, class: 'btn btn-primary' %>
+    <%= link_to 'Setup a Supportbee support source', new_supportbee_support_source_path, class: 'btn btn-primary' %>
+</p>

@@ -20,4 +20,7 @@
 class User < ActiveRecord::Base
   devise :database_authenticatable, :registerable,
          :recoverable, :rememberable, :validatable
+
+  has_many :github_support_sources
+  has_many :supportbee_support_sources
 end

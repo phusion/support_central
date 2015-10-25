@@ -117,6 +117,11 @@ describe GithubAnalyzer do
     result
   end
 
+  def issue_number(ticket)
+    ticket.external_id =~ /(\d+)$/
+    $1.to_i
+  end
+
   it 'deletes tickets for which the corresponding issue has already been answered' do
     create_dependencies
     @passenger_crash_monday = create(:passenger_crash_monday,
@@ -216,12 +221,14 @@ describe GithubAnalyzer do
     ticket1 = Ticket.where(external_id: 'phusion/passenger/issues/1').first
     expect(ticket1).not_to be_nil
     expect(ticket1.title).to eq('New ticket 1')
+    expect(ticket1.display_id).to eq('phusion/passenger #1')
     expect(ticket1.external_last_update_time).to \
       eq(Time.parse(issue2_last_comment_date))
 
     ticket2 = Ticket.where(external_id: 'phusion/passenger/issues/2').first
     expect(ticket2).not_to be_nil
     expect(ticket2.title).to eq('New ticket 2')
+    expect(ticket2.display_id).to eq('phusion/passenger #2')
     expect(ticket2.external_last_update_time).to \
       eq(Time.parse(issue3_last_comment_date))
   end
@@ -266,16 +273,22 @@ describe GithubAnalyzer do
 
     @passenger_crash_monday.reload
     expect(@passenger_crash_monday.title).to eq('ticket 1')
+    expect(@passenger_crash_monday.display_id).to \
+      eq("phusion/passenger ##{issue_number(@passenger_crash_monday)}")
     expect(@passenger_crash_monday.external_last_update_time).to \
       eq(Time.parse(issue1_last_comment_date))
 
     @ruby_5_0_not_supported.reload
     expect(@ruby_5_0_not_supported.title).to eq('ticket 2')
+    expect(@ruby_5_0_not_supported.display_id).to \
+      eq("phusion/passenger ##{issue_number(@ruby_5_0_not_supported)}")
     expect(@ruby_5_0_not_supported.external_last_update_time).to \
       eq(Time.parse(issue2_last_comment_date))
 
     @npm_package_needed.reload
     expect(@npm_package_needed.title).to eq('ticket 3')
+    expect(@npm_package_needed.display_id).to \
+      eq("phusion/passenger ##{issue_number(@npm_package_needed)}")
     expect(@npm_package_needed.external_last_update_time).to \
       eq(Time.parse(issue3_last_comment_date))
   end

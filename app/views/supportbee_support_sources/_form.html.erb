@@ -1,0 +1,48 @@
+<%= form_for(@support_source) do |f| %>
+    <% if @support_source.errors.any? %>
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title"><%= pluralize(@support_source.errors.count, "error") %> prohibited this support source from being saved</h3>
+        </div>
+        <div class="panel-body">
+            <% @support_source.errors.full_messages.each do |message| %>
+                <li><%= message %></li>
+            <% end %>
+            </ul>
+        </div>
+    </div>
+    <% end %>
+
+    <div class="form-group">
+        <%= f.label :name %>
+        <%= f.text_field :name, class: 'form-control' %>
+    </div>
+
+    <div class="form-group">
+        <%= f.label :supportbee_company_id, 'Supportbee company ID' %>
+        <%= f.text_field :supportbee_company_id, class: 'form-control' %>
+        <small>This is usually "phusion"</small>
+    </div>
+
+    <div class="form-group">
+        <%= f.label :supportbee_auth_token %>
+        <%= f.text_field :supportbee_auth_token, autocomplete: 'off', class: 'form-control' %>
+        <small>Obtain this in Supportbee -&gt; Account -&gt; API Token</small>
+    </div>
+
+    <div class="form-group">
+        <%= f.label :supportbee_user_id, 'Supportbee user account ID' %>
+        <%= f.text_field :supportbee_user_id, class: 'form-control' %>
+        <small>Obtain by hovering over the link 'Supportbee -&gt; Account -&gt; Name/Signature', then looking at its URL</small>
+    </div>
+
+    <div class="form-group">
+        <%= f.label :supportbee_group_ids_as_string, 'IDs of the Supportbee groups that you are part of' %>
+        <%= f.text_field :supportbee_group_ids_as_string, class: 'form-control' %>
+        <small>Comma separated. Obtain this from URLs in Supportbee. Passenger's ID is 4678, Union Station's ID is 4679. Ask Hongli if you need help</small>
+    </div>
+
+    <div class="actions">
+        <p><%= f.submit class: 'btn btn-primary' %></p>
+    </div>
+<% end %>

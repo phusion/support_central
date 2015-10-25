@@ -3,6 +3,10 @@ Rails.application.routes.draw do
     registrations: 'users/registrations'
   }
 
+  resources :support_sources
+  resources :supportbee_support_sources
+  resources :github_support_sources
+
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
 

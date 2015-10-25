@@ -1,0 +1,12 @@
+<%
+support_source = support_source_tab
+support_source_counter = support_source_tab_counter
+-%>
+<li role="presentation" class="support-source-tab <%= 'active' if support_source_counter == 0 %>">
+    <a href="#support_source_<%= support_source.id %>" aria-controls="support_source_<%= support_source.id %>" role="tab" data-toggle="tab">
+        <%= support_source.name %>
+        <% if support_source.tickets.any? %>
+            <span class="badge"><%= support_source.tickets.count %></span>
+        <% end %>
+    </a>
+</li>
