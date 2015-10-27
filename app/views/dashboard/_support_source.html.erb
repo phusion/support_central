@@ -1,4 +1,11 @@
 <div role="tabpanel" class="tab-pane support-source <%= 'active' if support_source_counter == 0 %>" id="support_source_<%= support_source.id %>">
+
+    <% if support_source.scheduler.working? %>
+        <div class="support-source-announcement">
+            <div class="alert alert-info">This support source is being synchronized. <a href="javascript:void(location.refresh())" class="alert-link">Reload this page</a> in a few minutes to check for updates.</div>
+        </div>
+    <% end %>
+
     <% if support_source.tickets.empty? %>
         <div class="intro-text intro-text-with-margin">
             <p>Hurray, there are no open support tickets for this source. :-)</p>
