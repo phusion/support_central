@@ -1,3 +1,4 @@
+<% @title = 'Edit profile' %>
 <h2>Edit profile</h2>
 
 <%= form_for(resource, as: resource_name, url: registration_path(resource_name), html: { method: :put }) do |f| %>
@@ -34,4 +35,5 @@
 
 <h3 id="delete-my-account">Delete my account</h3>
 
-<p><%= button_to "Cancel my account", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: 'btn btn-danger' %></p>
+<p><%= button_to "Delete my account, my tickets and all my other data", registration_path(resource_name), data: { confirm: "Are you sure?" }, method: :delete, class: 'btn btn-danger' %></p>
+<p><small>There is no turning back.</small></p>

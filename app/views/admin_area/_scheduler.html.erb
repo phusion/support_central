@@ -1,0 +1,22 @@
+<p>
+    Last synchronized at:
+        <% if scheduler.last_run_time %>
+            <%= distance_of_time_in_words_to_now(scheduler.last_run_time) %> ago
+        <% else %>
+            N/A
+        <% end %>
+    <br>
+    Next synchronization scheduled at:
+        <% if SupportCentral::Application.config.cache_classes %>
+            <%= distance_of_time_in_words_to_now(scheduler.next_run_time) %> from now
+        <% else %>
+            N/A
+        <% end %>
+</p>
+<p>
+    <% if scheduler.working? %>
+        <%= button_to 'Synchronize now', '#', disabled: true, class: 'btn btn-primary' %> <small>scheduler is working now</small>
+    <% else %>
+        <%= link_to 'Synchronize now', "admin/#{sync_action}", method: 'post', class: 'btn btn-primary' %>
+    <% end %>
+</p>

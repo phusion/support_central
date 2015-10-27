@@ -45,6 +45,10 @@ class Scheduler
     state == :working
   end
 
+  def thread_started?
+    !!@thread
+  end
+
   def next_run_time
     @mutex.synchronize { @next_run_time }
   end
@@ -61,8 +65,19 @@ class Scheduler
     schedule(Time.now + seconds)
   end
 
+  def perform_directly
+    raise 'Unsupported state' if @state != :idle
+    @state = :working
+    begin
+      perform_work(true)
+    ensure
+      @state = :idle
+      @last_run_time = Time.now
+    end
+  end
+
 protected
-  def perform_work
+  def perform_work(integrate_with_parent_transaction)
     raise NotImplementedError
   end
 
@@ -88,9 +103,13 @@ private
 
         @mutex.unlock
         begin
-          perform_work
+          perform_work(false)
         ensure
-          @mutex.lock
+          begin
+            ActiveRecord::Base.clear_active_connections!
+          ensure
+            @mutex.lock
+          end
         end
 
         @state = :idle

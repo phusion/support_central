@@ -8,4 +8,15 @@
             <%= render partial: 'ticket', collection: support_source.tickets %>
         </ul>
     <% end %>
+
+    <div class="support-source-footer">
+        <%= link_to admin_area_path do %>
+            Last synchronized at:
+            <% if support_source.scheduler.last_run_time %>
+                <%= distance_of_time_in_words_to_now(support_source.scheduler.last_run_time) %> ago
+            <% else %>
+                N/A
+            <% end %>
+        <% end %>
+    </div>
 </div>

@@ -45,7 +45,9 @@ protected
 
     comments = @octokit.issue_comments(repo_full_name,
       external_ticket.number)
-    internal_ticket.external_last_update_time = comments.last.created_at
+    if comments.last
+      internal_ticket.external_last_update_time = comments.last.created_at
+    end
   end
 
 private

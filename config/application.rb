@@ -9,6 +9,8 @@ Bundler.require(*Rails.groups)
 require_relative '../lib/config_file_loader'
 CONFIG = ConfigFileLoader.new.load
 
+Faraday.default_adapter = :net_http_persistent
+
 module SupportCentral
   class Application < Rails::Application
     # Settings in config/environments/* take precedence over those specified here.
@@ -27,7 +29,18 @@ module SupportCentral
 
     # Do not swallow errors in after_commit/after_rollback callbacks.
     config.active_record.raise_in_transactional_callbacks = true
+
+    config.after_initialize do
+      if config.cache_classes
+        Kernel.const_set(:GITHUB_SCHEDULER, GithubScheduler.new)
+        Kernel.const_set(:SUPPORTBEE_SCHEDULER, SupportbeeScheduler.new)
+        GITHUB_SCHEDULER.start_thread
+        SUPPORTBEE_SCHEDULER.start_thread
+        at_exit do
+          GITHUB_SCHEDULER.shutdown
+          SUPPORTBEE_SCHEDULER.shutdown
+        end
+      end
+    end
   end
 end
-
-Faraday.default_adapter = :net_http_persistent

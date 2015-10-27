@@ -29,6 +29,10 @@ class GithubSupportSource < SupportSource
     "https://github.com/#{github_owner_and_repo}/issues/#{github_issue_id(ticket)}"
   end
 
+  def scheduler
+    GithubScheduler.instance
+  end
+
 private
   def github_issue_id(ticket)
     ticket.external_id =~ /(\d+)$/

@@ -1,18 +1,28 @@
 class Analyzer
-  def analyze
-    @support_sources = get_support_sources
-    @support_source_ids = @support_sources.map { |s| s.id }
-    @data_sources = get_data_sources
+  def analyze(integrate_with_parent_transaction = true)
+    begin
+      @support_sources = get_support_sources
+      @support_source_ids = @support_sources.map { |s| s.id }
+      @data_sources = get_data_sources
 
-    @unanswered_external_tickets = fetch_unanswered_external_tickets
-    @unanswered_external_tickets_index = index_external_tickets(
-      @unanswered_external_tickets)
-    @unanswered_external_ticket_ids = @unanswered_external_tickets_index.keys
-    deduplicate_external_tickets
-    check_external_ticket_ids
+      if !integrate_with_parent_transaction
+        ActiveRecord::Base.clear_active_connections!
+      end
 
-    Ticket.transaction do
-      synchronize_internal_tickets
+      @unanswered_external_tickets = fetch_unanswered_external_tickets
+      @unanswered_external_tickets_index = index_external_tickets(
+        @unanswered_external_tickets)
+      @unanswered_external_ticket_ids = @unanswered_external_tickets_index.keys
+      deduplicate_external_tickets
+      check_external_ticket_ids
+
+      Ticket.transaction do
+        synchronize_internal_tickets
+      end
+    ensure
+      if !integrate_with_parent_transaction
+        ActiveRecord::Base.clear_active_connections!
+      end
     end
   end
 
