@@ -39,6 +39,9 @@ group :development do
   gem 'annotate'
   gem 'spring-commands-rspec'
   gem 'capistrano-rails'
+  gem 'capistrano-passenger'
+  gem 'capistrano-bundler'
+  gem 'capistrano-rvm'
 end
 
 group :development, :test do
