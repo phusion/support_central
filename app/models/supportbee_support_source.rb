@@ -35,7 +35,10 @@ class SupportbeeSupportSource < SupportSource
   end
 
   def supportbee_group_ids_as_string=(value)
-    self.supportbee_group_ids = value.to_s.split(',').reject { |x| x.blank? }
+    self.supportbee_group_ids = value.to_s.
+      split(',').
+      reject { |x| x.blank? }.
+      map { |x| x.strip }
   end
 
   def scheduler

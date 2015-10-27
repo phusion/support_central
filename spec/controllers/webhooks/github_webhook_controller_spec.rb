@@ -2,6 +2,7 @@ require 'rails_helper'
 
 RSpec.describe Webhooks::GithubWebhookController, type: :controller do
   HMAC_DIGEST = OpenSSL::Digest.new('sha1')
+  UNANSWERED_LABEL = GithubAnalyzer::UNANSWERED_LABEL
 
   let(:body_issue_opened_by_phusion_user) do
     {
@@ -129,7 +130,7 @@ RSpec.describe Webhooks::GithubWebhookController, type: :controller do
         body = body_issue_comment_created_by_phusion_user.dup
         body[:issue][:labels] = [
           { name: 'security' },
-          { name: 'Unanswered' },
+          { name: UNANSWERED_LABEL },
           { name: 'priority/high' }
         ]
 
@@ -149,7 +150,7 @@ RSpec.describe Webhooks::GithubWebhookController, type: :controller do
         body = body_issue_comment_not_created_by_phusion_user.dup
         body[:issue][:labels] = [
           { name: 'security' },
-          { name: 'Unanswered' },
+          { name: UNANSWERED_LABEL },
           { name: 'priority/high' }
         ]
         post_json_with_signature(:issue_comment, body)

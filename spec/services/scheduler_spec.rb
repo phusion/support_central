@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Scheduler do
+RSpec.describe Scheduler, type: :service do
   before :each do
     @scheduler = Scheduler.new
     @mutex = Mutex.new

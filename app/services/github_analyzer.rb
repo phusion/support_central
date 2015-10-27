@@ -1,6 +1,8 @@
 require 'uri'
 
 class GithubAnalyzer < Analyzer
+  UNANSWERED_LABEL = 'Unanswered'
+
   DataSource = Struct.new(:owner_and_repo)
 
   def initialize
@@ -26,7 +28,7 @@ protected
     result = []
     @data_sources.each do |data_source|
       result.concat(@octokit.list_issues(data_source.owner_and_repo,
-        state: 'all', labels: 'Unanswered'))
+        state: 'all', labels: UNANSWERED_LABEL))
     end
     result
   end

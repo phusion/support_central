@@ -11,5 +11,4 @@ require 'rails_helper'
 #   end
 # end
 describe DashboardHelper do
-  pending "add some examples to (or delete) #{__FILE__}"
 end

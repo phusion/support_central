@@ -1,4 +1,6 @@
 class Webhooks::GithubWebhookController < ApplicationController
+  UNANSWERED_LABEL = GithubAnalyzer::UNANSWERED_LABEL
+
   skip_before_action :authenticate_user!
   skip_before_action :verify_authenticity_token
 
@@ -39,11 +41,11 @@ private
   end
 
   def add_unanswered_label
-    update_labels((current_label_names + ['Unanswered']).uniq)
+    update_labels((current_label_names + [UNANSWERED_LABEL]).uniq)
   end
 
   def remove_unanswered_label
-    update_labels(current_label_names - ['Unanswered'])
+    update_labels(current_label_names - [UNANSWERED_LABEL])
   end
 
   def current_label_names

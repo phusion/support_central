@@ -39,7 +39,8 @@ class GithubSupportSourcesController < ApplicationController
         format.json { render :show, status: :ok, location: @support_source }
       else
         format.html { render :edit }
-        format.json { render json: @support_source.errors, status: :unprocessable_entity }
+        format.json { render json: @support_source.errors,
+          status: :unprocessable_entity }
       end
     end
   end
@@ -49,7 +50,8 @@ class GithubSupportSourcesController < ApplicationController
   def destroy
     @support_source.destroy
     respond_to do |format|
-      format.html { redirect_to support_sources_url, notice: 'Support source was successfully destroyed.' }
+      format.html { redirect_to support_sources_url,
+        notice: 'Support source was successfully destroyed.' }
       format.json { head :no_content }
     end
   end
