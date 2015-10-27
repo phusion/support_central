@@ -19,6 +19,7 @@ class ConfigFileLoader
         "a section for the #{rails_env} environment"
     end
 
+    require_key(config, 'email_from')
     require_key(config, 'github_api_token')
     require_key(config, 'github_webhook_secret')
 

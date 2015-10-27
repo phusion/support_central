@@ -22,7 +22,7 @@ This app requires PostgreSQL.
 
         $ sudo mkdir /var/www/support_central
         $ sudo chown support_central: /var/www/support_central
-        $ sudo -u support_central -H git clone git://github.com/phusion/support_central /var/www/support_central
+        $ sudo -u support_central -H git clone git://github.com/phusion/support_central.git /var/www/support_central
         $ cd /var/www/support_central
 
  5. Open a shell as `support_central`. If you are using RVM:
@@ -39,26 +39,37 @@ This app requires PostgreSQL.
 
         $ cp config/database.yml.example config/database.yml
         $ editor config/database.yml
+        $ chmod 600 config/database.yml
 
- 7. Install the gem bundle:
+ 7. Edit general configuration:
 
-        $ bundle install --without development test --production
+        $ cp config/config.yml.example config/config.yml
+        $ editor config/config.yml
+        $ chmod 600 config/config.yml
 
- 8. Run database migrations, generate assets:
+ 8. Install the gem bundle:
+
+        $ bundle install --without development test --deployment
+
+ 9. Run database migrations, generate assets:
 
         $ bundle exec rake db:migrate assets:precompile RAILS_ENV=production
 
- 9. Create an initial set of users:
+ 10. Create an initial set of users:
 
         $ bundle exec rake db:seed RAILS_ENV=production
 
- 10. Generate a secret key:
+ 11. Generate a secret key:
 
         $ bundle rake secret RAILS_ENV=production
 
-     Take note of the output. You need it in the next step.
+     Take note of the output. Create a secrets.yml and put the output in there as instructed:
 
- 11. Add Nginx virtual host. Be sure to substitute the `passenger_env_var` values with appropriate values.
+        $ cp config/secrets.yml.example config/secrets.yml
+        $ editor config/secrets.yml
+        $ chmod 600 config/secrets.yml
+
+ 12. Add Nginx virtual host. Be sure to substitute the `passenger_env_var` values with appropriate values.
 
         server {
             listen 443;
@@ -68,11 +79,4 @@ This app requires PostgreSQL.
             ssl on;
             root /var/www/support_central/public;
             passenger_enabled on;
-
-            # Fill in an appropriate value for email 'From' fields.
-            passenger_env_var MAILER_SENDER yourapp@yourdomain.com;
-            # Fill in the root URL of the app.
-            passenger_env_var ROOT_URL https://www.yourhost.com;
-            # Fill in value of secret key you generated in step 10.
-            passenger_env_var SECRET_KEY_BASE ...;
         }
