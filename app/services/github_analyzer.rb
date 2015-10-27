@@ -1,7 +1,7 @@
 require 'uri'
 
 class GithubAnalyzer < Analyzer
-  UNANSWERED_LABEL = 'Unanswered'
+  UNANSWERED_LABEL = 'Not yet answered by Phusion'
 
   DataSource = Struct.new(:owner_and_repo)
 
