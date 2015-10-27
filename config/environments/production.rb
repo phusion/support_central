@@ -77,7 +77,7 @@ Rails.application.configure do
   # Do not dump schema after migrations.
   config.active_record.dump_schema_after_migration = false
 
-  root_uri = URI.parse(ENV["ROOT_URL"] || "https://www.please-change-me-by-setting-ROOT_URL-env-var.com")
+  root_uri = URI.parse(ENV["ROOT_URL"] || CONFIG["root_url"] || "https://www.please-change-me-by-setting-ROOT_URL-env-var.com")
   config.action_mailer.default_url_options = {
     protocol: root_uri.scheme,
     host: root_uri.host,
