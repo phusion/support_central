@@ -83,4 +83,5 @@ Rails.application.configure do
     host: root_uri.host,
     port: root_uri.port
   }
+  config.action_mailer.delivery_method = :sendmail
 end
