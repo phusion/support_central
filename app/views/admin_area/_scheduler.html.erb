@@ -8,7 +8,11 @@
     <br>
     Next synchronization scheduled at:
         <% if SupportCentral::Application.config.cache_classes %>
-            <%= distance_of_time_in_words_to_now(scheduler.next_run_time) %> from now
+            <% if scheduler.next_run_time %>
+                <%= distance_of_time_in_words_to_now(scheduler.next_run_time) %> from now
+            <% else %>
+                not yet planned
+            <% end %>
         <% else %>
             N/A
         <% end %>
