@@ -4,7 +4,7 @@ class SupportSourcesController < ApplicationController
   # GET /support_sources
   # GET /support_sources.json
   def index
-    @support_sources = SupportSource.all
+    @support_sources = current_user.support_sources.all
   end
 
   # GET /support_sources/new
