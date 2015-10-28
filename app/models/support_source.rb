@@ -21,7 +21,8 @@
 #
 
 class SupportSource < ActiveRecord::Base
-  has_many :tickets, -> { order('status, display_id') }, inverse_of: 'support_source'
+  has_many :tickets, -> { order('status DESC, display_id') },
+    inverse_of: 'support_source'
 
   def type_name
     self.class.to_s.sub(/SupportSource$/, '')
