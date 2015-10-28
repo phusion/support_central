@@ -1,7 +1,10 @@
 require 'rails_helper'
 require 'time'
+require 'uri'
 
 describe GithubAnalyzer do
+  UNANSWERED_LABEL = GithubAnalyzer::UNANSWERED_LABEL
+
   let(:issue1_first_comment_date) { '2015-10-24T16:00:49Z' }
   let(:issue1_last_comment_date) { '2015-10-25T09:00:12Z' }
   let(:issue1_comments) do
@@ -82,12 +85,12 @@ describe GithubAnalyzer do
     @github = create(:github_passenger, user: @user)
   end
 
-  def stub_github_issues_request(body)
+  def stub_github_issues_request(body, repo = 'phusion/passenger')
     if !body.is_a?(String)
       body = body.to_json
     end
-    url = 'https://api.github.com/repos/phusion/passenger/issues?' \
-      'labels=Unanswered&per_page=100&state=all'
+    url = "https://api.github.com/repos/#{repo}/issues?" \
+      'labels=' + URI.escape(UNANSWERED_LABEL) + '&per_page=100&state=all'
     stub_request(:get, url).
       to_return(status: 200,
         headers: { 'Content-Type' => 'application/json' },
@@ -112,7 +115,7 @@ describe GithubAnalyzer do
       number: $1.to_i,
       title: ticket.title,
       html_url: "https://github.com/#{ticket.external_id}",
-      labels: [ { name: 'Unanswered' } ]
+      labels: [ { name: UNANSWERED_LABEL } ]
     }
     result
   end
@@ -185,14 +188,14 @@ describe GithubAnalyzer do
         number: 1,
         title: 'New ticket 1',
         html_url: 'https://github.com/phusion/passenger/issues/1',
-        labels: [ { name: 'Unanswered' } ]
+        labels: [ { name: UNANSWERED_LABEL } ]
       },
       {
         id: 2,
         number: 2,
         title: 'New ticket 2',
         html_url: 'https://github.com/phusion/passenger/issues/2',
-        labels: [ { name: 'Unanswered' } ]
+        labels: [ { name: UNANSWERED_LABEL } ]
       }
     ])
     stub2 = stub_github_comments_request(
