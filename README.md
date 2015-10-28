@@ -11,11 +11,6 @@ The following support channels are currently supported:
 
 This app requires PostgreSQL.
 
-First do some preparations on Github:
-
- 1. Add a webhook to your Git project with `http://www.yourhost.com/webhooks/github/hook` as URL. Take note of the webhook secret.
- 2. Add an authentication token to your account. Take note of the token.
-
 Now install on your server:
 
  1. Install Ruby 2.2.
