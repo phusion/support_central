@@ -33,6 +33,7 @@
             </p>
             <ol>
                 <li>Go to <tt>https://github.com/<em>OWNER_AND_REPO</em>/settings/hooks</tt></li>
+                <li>Check whether a team member has already setup a webhook for you using the payload URL specified below! If the webhook already exists, then you can skip setting up a webhook.</li>
                 <li>Click "Add webhook"</li>
                 <li>Enter payload URL: <tt><%= url_for(controller: 'webhooks/github_webhook', action: 'hook', only_path: false) %></tt></li>
                 <li>Select content type: application/json</li>
