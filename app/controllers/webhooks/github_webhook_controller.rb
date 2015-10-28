@@ -57,7 +57,7 @@ private
     if current_label_names != new_labels
       octokit.update_issue(json_body['repository']['full_name'],
         json_body['issue']['number'],
-        labels: new_labels.join(','))
+        labels: new_labels)
     end
   end
 
