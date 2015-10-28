@@ -1,6 +1,16 @@
 require 'rails_helper'
+require 'time'
 
 describe SupportbeeAnalyzer do
+  let(:time1_str) { '2012-01-18T15:17:33Z' }
+  let(:time2_str) { '2012-01-18T16:17:33Z' }
+  let(:time3_str) { '2012-01-18T17:17:33Z' }
+  let(:time4_str) { '2012-01-18T18:17:33Z' }
+  let(:time1) { Time.parse(time1_str) }
+  let(:time2) { Time.parse(time2_str) }
+  let(:time3) { Time.parse(time3_str) }
+  let(:time4) { Time.parse(time4_str) }
+
   def create_dependencies
     @user = create(:user)
     @supportbee = create(:supportbee, user: @user)
@@ -22,7 +32,8 @@ describe SupportbeeAnalyzer do
       ticket = {
         id: ticket.external_id.to_i,
         subject: ticket.title,
-        labels: []
+        labels: [],
+        last_activity_at: time1_str
       }
     end
     if !ticket.key?(:unanswered)
@@ -160,19 +171,22 @@ describe SupportbeeAnalyzer do
           id: 1,
           number: 1,
           subject: 'New ticket 1',
-          labels: [ { name: 'foo' } ]
+          labels: [ { name: 'foo' } ],
+          last_activity_at: time2_str
         }, false),
         ticket_as_json({
           id: 2,
           number: 2,
           subject: 'New ticket 2',
-          labels: [ { name: 'bar' } ]
+          labels: [ { name: 'bar' } ],
+          last_activity_at: time3_str
         }, false),
         ticket_as_json({
           id: 3,
           number: 3,
           subject: 'New ticket 3',
-          labels: [ { name: 'baz' } ]
+          labels: [ { name: 'baz' } ],
+          last_activity_at: time4_str
         }, true)
       )
       stub1 = stub_supportbee_request('assigned_user=none',
@@ -196,12 +210,14 @@ describe SupportbeeAnalyzer do
       expect(ticket1.labels).to eq(['foo'])
       expect(ticket1.display_id).to eq('1')
       expect(ticket1.external_id).to eq('1')
+      expect(ticket1.external_last_update_time).to eq(time2)
 
       ticket2 = Ticket.where(external_id: '2').first
       expect(ticket2.title).to eq('New ticket 2')
       expect(ticket2.labels).to eq(['bar'])
       expect(ticket2.display_id).to eq('2')
       expect(ticket2.external_id).to eq('2')
+      expect(ticket2.external_last_update_time).to eq(time3)
     end
 
     it 'does not touch existing tickets for unanswered Supportbee tickets' do
@@ -435,6 +451,7 @@ describe SupportbeeAnalyzer do
             id: 600,
             subject: 'Frequent memory warnings',
             labels: [],
+            last_activity_at: time1_str,
             current_assignee: { user: {
               id: @supportbee_hongli.supportbee_user_id
             } }
@@ -443,6 +460,7 @@ describe SupportbeeAnalyzer do
             id: 601,
             subject: 'Bundle install error',
             labels: [],
+            last_activity_at: time2_str,
             current_assignee: { user: {
               id: @supportbee_hongli.supportbee_user_id
             } }
@@ -464,6 +482,7 @@ describe SupportbeeAnalyzer do
             id: 610,
             subject: 'Metrics frontend crashes',
             labels: [],
+            last_activity_at: time1_str,
             current_assignee: { user: {
               id: @supportbee_tinco.supportbee_user_id
             } }
@@ -472,6 +491,7 @@ describe SupportbeeAnalyzer do
             id: 611,
             subject: 'Indexer protocol change',
             labels: [],
+            last_activity_at: time2_str,
             current_assignee: { user: {
               id: @supportbee_tinco.supportbee_user_id
             } }
@@ -516,6 +536,7 @@ describe SupportbeeAnalyzer do
             id: 600,
             subject: 'Frequent memory warnings',
             labels: [],
+            last_activity_at: time1_str,
             current_assignee: { group: {
               id: passenger_group
             } }
@@ -524,6 +545,7 @@ describe SupportbeeAnalyzer do
             id: 601,
             subject: 'Bundle install error',
             labels: [],
+            last_activity_at: time2_str,
             current_assignee: { group: {
               id: passenger_group
             } }
@@ -545,6 +567,7 @@ describe SupportbeeAnalyzer do
             id: 610,
             subject: 'Metrics frontend crashes',
             labels: [],
+            last_activity_at: time1_str,
             current_assignee: { group: {
               id: union_station_group
             } }
@@ -553,6 +576,7 @@ describe SupportbeeAnalyzer do
             id: 611,
             subject: 'Indexer protocol change',
             labels: [],
+            last_activity_at: time2_str,
             current_assignee: { group: {
               id: union_station_group
             } }
@@ -596,12 +620,14 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 600,
             subject: 'Frequent memory warnings',
-            labels: []
+            labels: [],
+            last_activity_at: time1_str
           }, false),
           ticket_as_json({
             id: 601,
             subject: 'Bundle install error',
-            labels: []
+            labels: [],
+            last_activity_at: time2_str
           }, false)
         )
         stub1 = stub_supportbee_request('assigned_user=none',
@@ -619,12 +645,14 @@ describe SupportbeeAnalyzer do
           ticket_as_json({
             id: 610,
             subject: 'Metrics frontend crashes',
-            labels: []
+            labels: [],
+            last_activity_at: time1_str
           }, false),
           ticket_as_json({
             id: 611,
             subject: 'Indexer protocol change',
-            labels: []
+            labels: [],
+            last_activity_at: time2_str
           }, false)
         )
         stub4 = stub_supportbee_request('assigned_user=none',

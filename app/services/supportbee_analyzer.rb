@@ -51,6 +51,9 @@ protected
     end
     internal_ticket.labels.delete('overdue')
     internal_ticket.labels.delete('respond now')
+
+    internal_ticket.external_last_update_time =
+      Time.parse(external_ticket['last_activity_at'])
   end
 
   def support_sources_eligible_for_external_ticket(external_ticket)
