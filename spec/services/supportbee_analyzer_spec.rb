@@ -11,6 +11,11 @@ describe SupportbeeAnalyzer do
   let(:time3) { Time.parse(time3_str) }
   let(:time4) { Time.parse(time4_str) }
 
+  let(:traveling_ruby_group) { 4567 }
+  let(:passenger_group) { 4568 }
+  let(:docker_group) { 4569 }
+  let(:union_station_group) { 4570 }
+
   def create_dependencies
     @user = create(:user)
     @supportbee = create(:supportbee, user: @user)
@@ -416,12 +421,7 @@ describe SupportbeeAnalyzer do
     end
   end
 
-  context 'when there are two support sources with both distinct and overlapping groups' do
-    let(:traveling_ruby_group) { 4567 }
-    let(:passenger_group) { 4568 }
-    let(:docker_group) { 4569 }
-    let(:union_station_group) { 4570 }
-
+  context 'given two support sources with both distinct and overlapping groups' do
     before :each do
       @user = create(:user)
       @supportbee_hongli = create(:supportbee,
@@ -694,6 +694,63 @@ describe SupportbeeAnalyzer do
         expect(indexer_protocol_change.map { |t| t.support_source.id }.sort).to \
           eq([@supportbee_hongli.id, @supportbee_tinco.id].sort)
       end
+    end
+  end
+
+  context 'given two support sources, one with and one without internal tickets' do
+    before :each do
+      @user = create(:user)
+      @supportbee_hongli = create(:supportbee,
+        name: 'Supportbee Hongli',
+        supportbee_auth_token: 'hongli',
+        supportbee_user_id: 1234,
+        supportbee_group_ids: [traveling_ruby_group, passenger_group, docker_group],
+        user: @user)
+      @supportbee_tinco = create(:supportbee,
+        name: 'Supportbee Tinco',
+        supportbee_auth_token: 'tinco',
+        supportbee_user_id: 1235,
+        supportbee_group_ids: [passenger_group, docker_group, union_station_group],
+        user: @user)
+    end
+
+    specify 'if there are unanswered external tickets, it creates internal tickets ' \
+            'in the support source that did not have any' \
+    do
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        support_source: @supportbee_hongli)
+
+      # API requests by Hongli
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array([]),
+        @supportbee_hongli.supportbee_auth_token)
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]),
+        @supportbee_hongli.supportbee_auth_token)
+      stub3 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([ticket_as_json(@frequent_memory_warnings, false)]),
+        @supportbee_hongli.supportbee_auth_token)
+
+      # API requests by Tinco
+      stub4 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array([]),
+        @supportbee_tinco.supportbee_auth_token)
+      stub5 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array([]),
+        @supportbee_tinco.supportbee_auth_token)
+      stub6 = stub_supportbee_request('assigned_group=mine',
+        make_tickets_array([ticket_as_json(@frequent_memory_warnings, false)]),
+        @supportbee_tinco.supportbee_auth_token)
+
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3)
+      assert_requested(stub4)
+      assert_requested(stub5)
+      assert_requested(stub6)
+      expect(Ticket.count).to eq(2)
     end
   end
 end

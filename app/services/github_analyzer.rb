@@ -52,6 +52,13 @@ protected
     end
   end
 
+  def support_sources_eligible_for_external_ticket(external_ticket)
+    repo_full_name = extract_repo_full_name(external_ticket.html_url)
+    @support_sources.find_all do |support_source|
+      support_source.github_owner_and_repo == repo_full_name
+    end
+  end
+
 private
   def extract_repo_full_name(issue_html_url)
     URI.parse(issue_html_url).path.

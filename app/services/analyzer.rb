@@ -98,8 +98,8 @@ private
   end
 
   def update_internal_tickets_based_on_external_tickets
-    internal_tickets = Ticket.where(support_source_id: @support_source_ids)
-    internal_tickets.each do |internal_ticket|
+    @internal_tickets = Ticket.where(support_source_id: @support_source_ids).all
+    @internal_tickets.each do |internal_ticket|
       external_ticket = @unanswered_external_tickets_index[
         internal_ticket.external_id]
       synchronize_internal_ticket(internal_ticket, external_ticket)
@@ -108,31 +108,45 @@ private
   end
 
   def create_internal_tickets_for_which_external_ticket_is_not_known
-    # Find the IDs of unanswered external tickets for which we
-    # don't have internal tickets yet
     if @unanswered_external_tickets.empty?
-      new_external_ticket_ids = []
-    else
-      new_external_ticket_ids = sql_select_values(%Q{
-        SELECT UNNEST(ARRAY[%s])
-        EXCEPT (SELECT external_id FROM tickets
-          WHERE support_source_id IN (%s))
-      } % [
-        sql_quote(@unanswered_external_ticket_ids),
-        sql_quote(@support_source_ids)
-      ])
+      return
+    end
+
+    # We want to find the IDs of unanswered external tickets for which
+    # not all our support sources have a corresponding internal ticket.
+    #
+    # While we're at it, create a set of
+    # [internal_ticket_id, corresponding_support_source_id]
+    # which will be used in the next step.
+    external_tickets_and_support_sources = {}
+    new_external_ticket_ids = []
+    external_tickets_and_support_sources_count = {}
+    @internal_tickets.each do |internal_ticket|
+      external_tickets_and_support_sources_count[internal_ticket.external_id] ||= 0
+      external_tickets_and_support_sources_count[internal_ticket.external_id] += 1
+      set_key = [internal_ticket.external_id, internal_ticket.support_source_id]
+      external_tickets_and_support_sources[set_key] = true
+    end
+    @unanswered_external_tickets_index.each_pair do |external_id, external_ticket|
+      count = external_tickets_and_support_sources_count[external_id] || 0
+      if count != @support_sources.size
+        new_external_ticket_ids << external_id
+      end
     end
 
     # Create internal tickets for the unanswered externals tickets
-    # related to the IDs we just found
+    # related to the IDs we just found, if one does not already exist.
     new_external_ticket_ids.each do |external_ticket_id|
       external_ticket = @unanswered_external_tickets_index[external_ticket_id]
       support_sources = support_sources_eligible_for_external_ticket(external_ticket)
       support_sources.each do |support_source|
-        internal_ticket = support_source.tickets.build
-        internal_ticket.external_id = id_for_external_ticket(external_ticket)
-        synchronize_internal_ticket(internal_ticket, external_ticket)
-        internal_ticket.save!
+        set_key = [external_ticket_id, support_source.id]
+        if !external_tickets_and_support_sources[set_key]
+          internal_ticket = support_source.tickets.build
+          internal_ticket.external_id = id_for_external_ticket(external_ticket)
+          synchronize_internal_ticket(internal_ticket, external_ticket)
+          internal_ticket.save!
+        end
       end
     end
   end

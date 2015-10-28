@@ -319,4 +319,85 @@ describe GithubAnalyzer do
     expect(Ticket.exists?(@npm_package_needed.id)).to be_truthy
     expect(Ticket.exists?(@off_by_one_bug.id)).to be_falsey
   end
+
+  context 'given two support sources' do
+    before :each do
+      @user = create(:user)
+      @user2 = create(:user2)
+      @github_passenger = create(:github_passenger,
+        name: 'Passenger',
+        user: @user)
+      @github_unicorn = create(:github_passenger,
+        name: 'Unicorn',
+        github_owner_and_repo: 'phusion/unicorn',
+        user: @user)
+    end
+
+    it 'only creates tickets in the corresponding support source' do
+      @passenger_crash_monday = create(:passenger_crash_monday,
+        support_source: @github_passenger)
+
+      stub1 = stub_github_issues_request([
+        ticket_as_json(@passenger_crash_monday)
+      ])
+      stub2 = stub_github_issues_request([
+        {
+          id: 1,
+          number: 1,
+          title: 'New ticket 1',
+          html_url: 'https://github.com/phusion/unicorn/issues/1',
+          labels: [ { name: UNANSWERED_LABEL } ]
+        }
+      ], 'phusion/unicorn')
+      stub3 = stub_github_comments_request(
+        @passenger_crash_monday.external_id,
+        issue1_comments)
+      stub4 = stub_github_comments_request(
+        "phusion/unicorn/issues/1",
+        issue1_comments)
+
+      GithubAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2)
+      assert_requested(stub3, at_least_times: 1)
+      assert_requested(stub4, at_least_times: 1)
+      expect(Ticket.count).to eq(2)
+    end
+  end
+
+  context 'given two support sources, one with and one without internal tickets' do
+    before :each do
+      @user = create(:user)
+      @user2 = create(:user2)
+      @source1 = create(:github_passenger,
+        name: 'Passenger',
+        user: @user)
+      @source2 = create(:github_passenger,
+        name: 'Passenger',
+        user: @user2)
+    end
+
+    specify 'if there are unanswered external tickets, it creates internal tickets ' \
+            'in the support source that did not have any' \
+    do
+      @passenger_crash_monday = create(:passenger_crash_monday,
+        support_source: @source1)
+
+      stub1 = stub_github_issues_request([
+        ticket_as_json(@passenger_crash_monday)
+      ])
+      stub2 = stub_github_comments_request(
+        @passenger_crash_monday.external_id,
+        issue1_comments)
+
+      GithubAnalyzer.new.analyze
+
+      assert_requested(stub1)
+      assert_requested(stub2, at_least_times: 1)
+      expect(Ticket.count).to eq(2)
+      expect(@source1.tickets.count).to eq(1)
+      expect(@source2.tickets.count).to eq(1)
+    end
+  end
 end
