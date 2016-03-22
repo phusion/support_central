@@ -75,7 +75,7 @@ describe SupportbeeAnalyzer do
       @view_rolling_restart_status = create(:view_rolling_restart_status,
         support_source: @supportbee)
 
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(
           ticket_as_json(@frequent_memory_warnings, false),
           ticket_as_json(@bundle_install_error, true)
@@ -115,7 +115,7 @@ describe SupportbeeAnalyzer do
       @apt_repo_down = create(:apt_repo_down,
         support_source: @supportbee)
 
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(
           ticket_as_json(@bundle_install_error, true)
         )
@@ -154,7 +154,7 @@ describe SupportbeeAnalyzer do
       @view_rolling_restart_status = create(:view_rolling_restart_status,
         support_source: @supportbee)
 
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(
           ticket_as_json(@frequent_memory_warnings, false),
           ticket_as_json(@bundle_install_error, true)
@@ -203,7 +203,7 @@ describe SupportbeeAnalyzer do
       @yum_repo_signature_error = create(:yum_repo_signature_error,
         support_source: @supportbee)
 
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array([]))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -247,7 +247,7 @@ describe SupportbeeAnalyzer do
           last_activity_at: time4_str
         }, true)
       )
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         stubbed_body)
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -295,7 +295,7 @@ describe SupportbeeAnalyzer do
         ticket_as_json(@apt_repo_down, false),
         ticket_as_json(@yum_repo_signature_error, false)
       )
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         stubbed_body)
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -326,7 +326,7 @@ describe SupportbeeAnalyzer do
       @yum_repo_signature_error = create(:yum_repo_signature_error,
         support_source: @supportbee)
 
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array([]))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -354,7 +354,7 @@ describe SupportbeeAnalyzer do
 
       json = ticket_as_json(@frequent_memory_warnings, false)
       json[:labels] = [ { name: 'respond now' } ]
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -379,7 +379,7 @@ describe SupportbeeAnalyzer do
 
       json = ticket_as_json(@frequent_memory_warnings, false)
       json[:labels] = [ { name: 'overdue' } ]
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -404,7 +404,7 @@ describe SupportbeeAnalyzer do
 
       json = ticket_as_json(@frequent_memory_warnings, false)
       json[:labels] = [ { name: 'respond now' }, { name: 'overdue' } ]
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -429,7 +429,7 @@ describe SupportbeeAnalyzer do
         support_source: @supportbee)
 
       json = ticket_as_json(@frequent_memory_warnings, false)
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -457,7 +457,7 @@ describe SupportbeeAnalyzer do
         { name: 'overdue' },
         { name: 'respond now' }
       ]
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
@@ -496,7 +496,7 @@ describe SupportbeeAnalyzer do
          'matching the assigned user' \
       do
         # API requests for Hongli
-        stub_supportbee_request('assigned_user=none',
+        stub_supportbee_request('assigned_user=none&assigned_team=none',
           make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
         stubbed_body = make_tickets_array(
@@ -527,7 +527,7 @@ describe SupportbeeAnalyzer do
           @supportbee_hongli.supportbee_auth_token)
 
         # API requests for Tinco
-        stub_supportbee_request('assigned_user=none',
+        stub_supportbee_request('assigned_user=none&assigned_team=none',
           make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
         stubbed_body = make_tickets_array(
@@ -578,7 +578,7 @@ describe SupportbeeAnalyzer do
          'matching the assigned team' \
       do
         # API requests for Hongli
-        stub1 = stub_supportbee_request('assigned_user=none',
+        stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
           make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
         stub2 = stub_supportbee_request('assigned_user=me',
@@ -609,7 +609,7 @@ describe SupportbeeAnalyzer do
           @supportbee_hongli.supportbee_auth_token)
 
         # API requests for Tinco
-        stub4 = stub_supportbee_request('assigned_user=none',
+        stub4 = stub_supportbee_request('assigned_user=none&assigned_team=none',
           make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
         stub5 = stub_supportbee_request('assigned_user=me',
@@ -683,7 +683,7 @@ describe SupportbeeAnalyzer do
             last_activity_at: time2_str
           }, false)
         )
-        stub1 = stub_supportbee_request('assigned_user=none',
+        stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
           stubbed_body,
           @supportbee_hongli.supportbee_auth_token)
         stub2 = stub_supportbee_request('assigned_user=me',
@@ -708,7 +708,7 @@ describe SupportbeeAnalyzer do
             last_activity_at: time2_str
           }, false)
         )
-        stub4 = stub_supportbee_request('assigned_user=none',
+        stub4 = stub_supportbee_request('assigned_user=none&assigned_team=none',
           stubbed_body,
           @supportbee_tinco.supportbee_auth_token)
         stub5 = stub_supportbee_request('assigned_user=me',
@@ -774,7 +774,7 @@ describe SupportbeeAnalyzer do
         support_source: @supportbee_hongli)
 
       # API requests by Hongli
-      stub1 = stub_supportbee_request('assigned_user=none',
+      stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array([]),
         @supportbee_hongli.supportbee_auth_token)
       stub2 = stub_supportbee_request('assigned_user=me',
@@ -785,7 +785,7 @@ describe SupportbeeAnalyzer do
         @supportbee_hongli.supportbee_auth_token)
 
       # API requests by Tinco
-      stub4 = stub_supportbee_request('assigned_user=none',
+      stub4 = stub_supportbee_request('assigned_user=none&assigned_team=none',
         make_tickets_array([]),
         @supportbee_tinco.supportbee_auth_token)
       stub5 = stub_supportbee_request('assigned_user=me',

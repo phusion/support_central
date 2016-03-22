@@ -21,7 +21,7 @@ protected
     @data_sources.each do |source|
       client = Supportbee::Client.new(company: source.company_id,
         auth_token: source.auth_token)
-      result.concat(query_unanswered_tickets(client, assigned_user: 'none'))
+      result.concat(query_unanswered_tickets(client, assigned_user: 'none', assigned_team: 'none'))
       result.concat(query_unanswered_tickets(client, assigned_user: 'me'))
       result.concat(query_unanswered_tickets(client, assigned_team: 'mine'))
     end
