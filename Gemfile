@@ -42,6 +42,7 @@ group :development do
   gem 'capistrano-passenger'
   gem 'capistrano-bundler'
   gem 'capistrano-rvm'
+  gem 'awesome_print'
 end
 
 group :development, :test do

@@ -10,6 +10,11 @@ require_relative '../lib/config_file_loader'
 CONFIG = ConfigFileLoader.new.load
 
 Faraday.default_adapter = :net_http_persistent
+if defined?(AwesomePrint)
+  AwesomePrint.defaults = {
+    :indent => -4
+  }
+end
 
 module SupportCentral
   class Application < Rails::Application

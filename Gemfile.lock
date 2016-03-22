@@ -48,6 +48,7 @@ GEM
       activerecord (>= 3.2, <= 4.3)
       rake (~> 10.4)
     arel (6.0.3)
+    awesome_print (1.6.1)
     bcrypt (3.1.10)
     binding_of_caller (0.7.2)
       debug_inspector (>= 0.0.1)
@@ -269,6 +270,7 @@ PLATFORMS
 
 DEPENDENCIES
   annotate
+  awesome_print
   capistrano-bundler
   capistrano-passenger
   capistrano-rails
