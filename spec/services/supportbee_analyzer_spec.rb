@@ -11,10 +11,10 @@ describe SupportbeeAnalyzer do
   let(:time3) { Time.parse(time3_str) }
   let(:time4) { Time.parse(time4_str) }
 
-  let(:traveling_ruby_group) { 4567 }
-  let(:passenger_group) { 4568 }
-  let(:docker_group) { 4569 }
-  let(:union_station_group) { 4570 }
+  let(:traveling_ruby_team) { 4567 }
+  let(:passenger_team) { 4568 }
+  let(:docker_team) { 4569 }
+  let(:union_station_team) { 4570 }
 
   def create_dependencies
     @user = create(:user)
@@ -86,7 +86,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json(@apt_repo_down, true)
         )
       )
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array(
           ticket_as_json(@yum_repo_signature_error, true),
           ticket_as_json(@view_rolling_restart_status, false)
@@ -125,7 +125,7 @@ describe SupportbeeAnalyzer do
           ticket_as_json(@apt_repo_down, false)
         )
       )
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -137,6 +137,59 @@ describe SupportbeeAnalyzer do
       expect(Ticket.exists?(@frequent_memory_warnings.id)).to be_falsey
       expect(Ticket.exists?(@bundle_install_error.id)).to be_falsey
       expect(Ticket.exists?(@apt_repo_down.id)).to be_truthy
+    end
+
+    it 'deletes internal tickets for which the corresponding Supportbee ticket has been reassigned ' \
+      'to a team that the current user is not part of' \
+    do
+      create_dependencies
+      @frequent_memory_warnings = create(:frequent_memory_warnings,
+        support_source: @supportbee)
+      @bundle_install_error = create(:bundle_install_error,
+        support_source: @supportbee)
+      @apt_repo_down = create(:apt_repo_down,
+        support_source: @supportbee)
+      @yum_repo_signature_error = create(:yum_repo_signature_error,
+        support_source: @supportbee)
+      @view_rolling_restart_status = create(:view_rolling_restart_status,
+        support_source: @supportbee)
+
+      stub1 = stub_supportbee_request('assigned_user=none',
+        make_tickets_array(
+          ticket_as_json(@frequent_memory_warnings, false),
+          ticket_as_json(@bundle_install_error, true)
+        )
+      ).times(2)
+      stub2 = stub_supportbee_request('assigned_user=me',
+        make_tickets_array(
+          ticket_as_json(@apt_repo_down, true)
+        )
+      ).times(2)
+      stub3 = stub_supportbee_request('assigned_team=mine',
+        make_tickets_array(
+          ticket_as_json(@yum_repo_signature_error, true),
+          ticket_as_json(@view_rolling_restart_status, false)
+        )
+      ).then.to_return(
+        status: 200,
+        headers: { 'Content-Type' => 'application/json' },
+        body: make_tickets_array(
+          ticket_as_json(@yum_repo_signature_error, true)
+        ).to_json
+      )
+
+      SupportbeeAnalyzer.new.analyze
+      SupportbeeAnalyzer.new.analyze
+
+      assert_requested(stub1, times: 2)
+      assert_requested(stub2, times: 2)
+      assert_requested(stub3, times: 2)
+      expect(Ticket.count).to eq(1)
+      expect(Ticket.exists?(@frequent_memory_warnings.id)).to be_truthy
+      expect(Ticket.exists?(@bundle_install_error.id)).to be_falsey
+      expect(Ticket.exists?(@apt_repo_down.id)).to be_falsey
+      expect(Ticket.exists?(@yum_repo_signature_error.id)).to be_falsey
+      expect(Ticket.exists?(@view_rolling_restart_status.id)).to be_falsey
     end
 
     it 'deletes all internal tickets if there are no unanswered Supportbee tickets' do
@@ -154,7 +207,7 @@ describe SupportbeeAnalyzer do
         make_tickets_array([]))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -198,7 +251,7 @@ describe SupportbeeAnalyzer do
         stubbed_body)
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -246,7 +299,7 @@ describe SupportbeeAnalyzer do
         stubbed_body)
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -277,7 +330,7 @@ describe SupportbeeAnalyzer do
         make_tickets_array([]))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -305,7 +358,7 @@ describe SupportbeeAnalyzer do
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -330,7 +383,7 @@ describe SupportbeeAnalyzer do
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -355,7 +408,7 @@ describe SupportbeeAnalyzer do
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -380,7 +433,7 @@ describe SupportbeeAnalyzer do
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -408,7 +461,7 @@ describe SupportbeeAnalyzer do
         make_tickets_array(json))
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]))
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([]))
 
       SupportbeeAnalyzer.new.analyze
@@ -421,20 +474,20 @@ describe SupportbeeAnalyzer do
     end
   end
 
-  context 'given two support sources with both distinct and overlapping groups' do
+  context 'given two support sources with both distinct and overlapping teams' do
     before :each do
       @user = create(:user)
       @supportbee_hongli = create(:supportbee,
         name: 'Supportbee Hongli',
         supportbee_auth_token: 'hongli',
         supportbee_user_id: 1234,
-        supportbee_group_ids: [traveling_ruby_group, passenger_group, docker_group],
+        supportbee_group_ids: [traveling_ruby_team, passenger_team, docker_team],
         user: @user)
       @supportbee_tinco = create(:supportbee,
         name: 'Supportbee Tinco',
         supportbee_auth_token: 'tinco',
         supportbee_user_id: 1235,
-        supportbee_group_ids: [passenger_group, docker_group, union_station_group],
+        supportbee_group_ids: [passenger_team, docker_team, union_station_team],
         user: @user)
     end
 
@@ -452,7 +505,7 @@ describe SupportbeeAnalyzer do
             subject: 'Frequent memory warnings',
             labels: [],
             last_activity_at: time1_str,
-            current_assignee: { user: {
+            current_team_assignee: { user: {
               id: @supportbee_hongli.supportbee_user_id
             } }
           }, false),
@@ -461,7 +514,7 @@ describe SupportbeeAnalyzer do
             subject: 'Bundle install error',
             labels: [],
             last_activity_at: time2_str,
-            current_assignee: { user: {
+            current_team_assignee: { user: {
               id: @supportbee_hongli.supportbee_user_id
             } }
           }, false)
@@ -469,7 +522,7 @@ describe SupportbeeAnalyzer do
         stub_supportbee_request('assigned_user=me',
           stubbed_body,
           @supportbee_hongli.supportbee_auth_token)
-        stub_supportbee_request('assigned_group=mine',
+        stub_supportbee_request('assigned_team=mine',
           make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
 
@@ -483,7 +536,7 @@ describe SupportbeeAnalyzer do
             subject: 'Metrics frontend crashes',
             labels: [],
             last_activity_at: time1_str,
-            current_assignee: { user: {
+            current_team_assignee: { user: {
               id: @supportbee_tinco.supportbee_user_id
             } }
           }, false),
@@ -492,7 +545,7 @@ describe SupportbeeAnalyzer do
             subject: 'Indexer protocol change',
             labels: [],
             last_activity_at: time2_str,
-            current_assignee: { user: {
+            current_team_assignee: { user: {
               id: @supportbee_tinco.supportbee_user_id
             } }
           }, false)
@@ -500,7 +553,7 @@ describe SupportbeeAnalyzer do
         stub_supportbee_request('assigned_user=me',
           stubbed_body,
           @supportbee_tinco.supportbee_auth_token)
-        stub_supportbee_request('assigned_group=mine',
+        stub_supportbee_request('assigned_team=mine',
           make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
 
@@ -522,7 +575,7 @@ describe SupportbeeAnalyzer do
       end
 
       it 'creates corresponding internal tickets for support sources ' \
-         'matching the assigned group' \
+         'matching the assigned team' \
       do
         # API requests for Hongli
         stub1 = stub_supportbee_request('assigned_user=none',
@@ -537,8 +590,8 @@ describe SupportbeeAnalyzer do
             subject: 'Frequent memory warnings',
             labels: [],
             last_activity_at: time1_str,
-            current_assignee: { group: {
-              id: passenger_group
+            current_team_assignee: { team: {
+              id: passenger_team
             } }
           }, false),
           ticket_as_json({
@@ -546,12 +599,12 @@ describe SupportbeeAnalyzer do
             subject: 'Bundle install error',
             labels: [],
             last_activity_at: time2_str,
-            current_assignee: { group: {
-              id: passenger_group
+            current_team_assignee: { team: {
+              id: passenger_team
             } }
           }, false)
         )
-        stub3 = stub_supportbee_request('assigned_group=mine',
+        stub3 = stub_supportbee_request('assigned_team=mine',
           stubbed_body,
           @supportbee_hongli.supportbee_auth_token)
 
@@ -568,8 +621,8 @@ describe SupportbeeAnalyzer do
             subject: 'Metrics frontend crashes',
             labels: [],
             last_activity_at: time1_str,
-            current_assignee: { group: {
-              id: union_station_group
+            current_team_assignee: { team: {
+              id: union_station_team
             } }
           }, false),
           ticket_as_json({
@@ -577,12 +630,12 @@ describe SupportbeeAnalyzer do
             subject: 'Indexer protocol change',
             labels: [],
             last_activity_at: time2_str,
-            current_assignee: { group: {
-              id: union_station_group
+            current_team_assignee: { team: {
+              id: union_station_team
             } }
           }, false)
         )
-        stub6 = stub_supportbee_request('assigned_group=mine',
+        stub6 = stub_supportbee_request('assigned_team=mine',
           stubbed_body,
           @supportbee_tinco.supportbee_auth_token)
 
@@ -636,7 +689,7 @@ describe SupportbeeAnalyzer do
         stub2 = stub_supportbee_request('assigned_user=me',
           make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
-        stub3 = stub_supportbee_request('assigned_group=mine',
+        stub3 = stub_supportbee_request('assigned_team=mine',
           make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
 
@@ -661,7 +714,7 @@ describe SupportbeeAnalyzer do
         stub5 = stub_supportbee_request('assigned_user=me',
           make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
-        stub6 = stub_supportbee_request('assigned_group=mine',
+        stub6 = stub_supportbee_request('assigned_team=mine',
           make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
 
@@ -704,13 +757,13 @@ describe SupportbeeAnalyzer do
         name: 'Supportbee Hongli',
         supportbee_auth_token: 'hongli',
         supportbee_user_id: 1234,
-        supportbee_group_ids: [traveling_ruby_group, passenger_group, docker_group],
+        supportbee_group_ids: [traveling_ruby_team, passenger_team, docker_team],
         user: @user)
       @supportbee_tinco = create(:supportbee,
         name: 'Supportbee Tinco',
         supportbee_auth_token: 'tinco',
         supportbee_user_id: 1235,
-        supportbee_group_ids: [passenger_group, docker_group, union_station_group],
+        supportbee_group_ids: [passenger_team, docker_team, union_station_team],
         user: @user)
     end
 
@@ -727,7 +780,7 @@ describe SupportbeeAnalyzer do
       stub2 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]),
         @supportbee_hongli.supportbee_auth_token)
-      stub3 = stub_supportbee_request('assigned_group=mine',
+      stub3 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([ticket_as_json(@frequent_memory_warnings, false)]),
         @supportbee_hongli.supportbee_auth_token)
 
@@ -738,7 +791,7 @@ describe SupportbeeAnalyzer do
       stub5 = stub_supportbee_request('assigned_user=me',
         make_tickets_array([]),
         @supportbee_tinco.supportbee_auth_token)
-      stub6 = stub_supportbee_request('assigned_group=mine',
+      stub6 = stub_supportbee_request('assigned_team=mine',
         make_tickets_array([ticket_as_json(@frequent_memory_warnings, false)]),
         @supportbee_tinco.supportbee_auth_token)
 

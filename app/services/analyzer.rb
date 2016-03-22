@@ -79,12 +79,12 @@ private
   end
 
   def synchronize_internal_tickets
-    delete_internal_tickets_for_which_external_ticket_is_answered
+    delete_internal_tickets_for_which_external_ticket_is_answered_or_gone
     update_internal_tickets_based_on_external_tickets
     create_internal_tickets_for_which_external_ticket_is_not_known
   end
 
-  def delete_internal_tickets_for_which_external_ticket_is_answered
+  def delete_internal_tickets_for_which_external_ticket_is_answered_or_gone
     if @unanswered_external_tickets.empty?
       Ticket.
         where(support_source_id: @support_source_ids).

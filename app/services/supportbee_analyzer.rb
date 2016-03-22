@@ -23,7 +23,7 @@ protected
         auth_token: source.auth_token)
       result.concat(query_unanswered_tickets(client, assigned_user: 'none'))
       result.concat(query_unanswered_tickets(client, assigned_user: 'me'))
-      result.concat(query_unanswered_tickets(client, assigned_group: 'mine'))
+      result.concat(query_unanswered_tickets(client, assigned_team: 'mine'))
     end
     result
   end
@@ -57,7 +57,7 @@ protected
   end
 
   def support_sources_eligible_for_external_ticket(external_ticket)
-    assignee = external_ticket['current_assignee']
+    assignee = external_ticket['current_team_assignee']
     if assignee
       if assignee['user']
         user_id = assignee['user']['id']
@@ -65,9 +65,9 @@ protected
           support_source.supportbee_user_id == user_id
         end
       else
-        group_id = assignee['group']['id'].to_s
+        team_id = assignee['team']['id'].to_s
         @support_sources.find_all do |support_source|
-          support_source.supportbee_group_ids.include?(group_id)
+          support_source.supportbee_group_ids.include?(team_id)
         end
       end
     else
