@@ -42,7 +42,6 @@ group :development do
   gem 'capistrano-passenger'
   gem 'capistrano-bundler'
   gem 'capistrano-rvm'
-  gem 'awesome_print'
 end
 
 group :development, :test do
@@ -56,6 +55,7 @@ group :development, :test do
   gem 'spring'
 
   gem 'rspec-rails'
+  gem 'awesome_print'
 end
 
 group :test do
