@@ -496,7 +496,7 @@ describe SupportbeeAnalyzer do
          'matching the assigned user' \
       do
         # API requests for Hongli
-        stub_supportbee_request('assigned_user=none&assigned_team=none',
+        stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
           make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
         stubbed_body = make_tickets_array(
@@ -519,15 +519,15 @@ describe SupportbeeAnalyzer do
             } }
           }, false)
         )
-        stub_supportbee_request('assigned_user=me',
+        stub2 = stub_supportbee_request('assigned_user=me',
           stubbed_body,
           @supportbee_hongli.supportbee_auth_token)
-        stub_supportbee_request('assigned_team=mine',
+        stub3 = stub_supportbee_request('assigned_team=mine',
           make_tickets_array([]),
           @supportbee_hongli.supportbee_auth_token)
 
         # API requests for Tinco
-        stub_supportbee_request('assigned_user=none&assigned_team=none',
+        stub4 = stub_supportbee_request('assigned_user=none&assigned_team=none',
           make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
         stubbed_body = make_tickets_array(
@@ -550,14 +550,21 @@ describe SupportbeeAnalyzer do
             } }
           }, false)
         )
-        stub_supportbee_request('assigned_user=me',
+        stub4 = stub_supportbee_request('assigned_user=me',
           stubbed_body,
           @supportbee_tinco.supportbee_auth_token)
-        stub_supportbee_request('assigned_team=mine',
+        stub5 = stub_supportbee_request('assigned_team=mine',
           make_tickets_array([]),
           @supportbee_tinco.supportbee_auth_token)
 
         SupportbeeAnalyzer.new.analyze
+
+        assert_requested(stub1)
+        assert_requested(stub2)
+        assert_requested(stub3)
+        assert_requested(stub4)
+        assert_requested(stub5)
+
         expect(Ticket.count).to eq(4)
         expect(Ticket.where(title: 'Frequent memory warnings').count).to eq(1)
         expect(Ticket.where(title: 'Bundle install error').count).to eq(1)
@@ -746,6 +753,90 @@ describe SupportbeeAnalyzer do
           eq([@supportbee_hongli.id, @supportbee_tinco.id].sort)
         expect(indexer_protocol_change.map { |t| t.support_source.id }.sort).to \
           eq([@supportbee_hongli.id, @supportbee_tinco.id].sort)
+      end
+    end
+
+    context 'given unanswered Supportbee tickets that have been reassigned to another team' do
+      it 'deletes internal tickets corresponding to external tickets that a support resource no longer sees' do
+        # API requests for Hongli
+        stub1 = stub_supportbee_request('assigned_user=none&assigned_team=none',
+          make_tickets_array([]),
+          @supportbee_hongli.supportbee_auth_token
+        ).times(2)
+        stub2 = stub_supportbee_request('assigned_user=me',
+          make_tickets_array([]),
+          @supportbee_hongli.supportbee_auth_token
+        ).times(2)
+        stub3 = stub_supportbee_request('assigned_team=mine',
+          make_tickets_array([
+            ticket_as_json({
+              id: 600,
+              subject: 'Frequent memory warnings',
+              labels: [],
+              last_activity_at: time1_str,
+              current_team_assignee: { team: {
+                id: passenger_team
+              } }
+            }, false),
+          ]),
+          @supportbee_hongli.supportbee_auth_token
+        ).then.to_return(
+          status: 200,
+          headers: { 'Content-Type' => 'application/json' },
+          body: make_tickets_array([]).to_json
+        )
+
+        # API requests for Tinco
+        stub4 = stub_supportbee_request('assigned_user=none&assigned_team=none',
+          make_tickets_array([]),
+          @supportbee_tinco.supportbee_auth_token
+        ).times(2)
+        stub5 = stub_supportbee_request('assigned_user=me',
+          make_tickets_array([]),
+          @supportbee_tinco.supportbee_auth_token
+        ).times(2)
+        stub6 = stub_supportbee_request('assigned_team=mine',
+          make_tickets_array([]),
+          @supportbee_tinco.supportbee_auth_token
+        ).then.to_return(
+          status: 200,
+          headers: { 'Content-Type' => 'application/json' },
+          body: make_tickets_array([
+            ticket_as_json({
+              id: 600,
+              subject: 'Frequent memory warnings',
+              labels: [],
+              last_activity_at: time1_str,
+              current_team_assignee: { team: {
+                id: union_station_team
+              } }
+            }, false)
+          ]).to_json
+        )
+
+        SupportbeeAnalyzer.new.analyze
+
+        assert_requested(stub1)
+        assert_requested(stub2)
+        assert_requested(stub3)
+        assert_requested(stub4)
+        assert_requested(stub5)
+        assert_requested(stub6)
+
+        expect(@supportbee_hongli.tickets.count).to eq(1)
+        expect(@supportbee_tinco.tickets.count).to eq(1)
+
+        SupportbeeAnalyzer.new.analyze
+
+        assert_requested(stub1, times: 2)
+        assert_requested(stub2, times: 2)
+        assert_requested(stub3, times: 2)
+        assert_requested(stub4, times: 2)
+        assert_requested(stub5, times: 2)
+        assert_requested(stub6, times: 2)
+
+        expect(@supportbee_hongli.tickets.count).to eq(0)
+        expect(@supportbee_tinco.tickets.count).to eq(1)
       end
     end
   end

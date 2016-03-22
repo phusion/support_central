@@ -45,7 +45,15 @@ protected
     raise NotImplementedError
   end
 
+  def filter_unanswered_external_ticket_ids_for_support_source(support_source)
+    raise NotImplementedError
+  end
+
   def id_for_external_ticket(external_ticket)
+    raise NotImplementedError
+  end
+
+  def different_data_sources_see_different_tickets?
     raise NotImplementedError
   end
 
@@ -89,6 +97,21 @@ private
       Ticket.
         where(support_source_id: @support_source_ids).
         delete_all
+    elsif different_support_sources_see_different_tickets?
+      @support_sources.each do |support_source|
+        unanswered_external_ticket_ids = filter_unanswered_external_ticket_ids_for_support_source(
+          support_source)
+        if unanswered_external_ticket_ids.empty?
+          Ticket.
+            where(support_source_id: support_source.id).
+            delete_all
+        else
+          Ticket.
+            where(support_source_id: support_source.id).
+            where('external_id NOT IN (?)', unanswered_external_ticket_ids).
+            delete_all
+        end
+      end
     else
       Ticket.
         where(support_source_id: @support_source_ids).

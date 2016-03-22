@@ -37,6 +37,10 @@ protected
     external_ticket.html_url.sub(%r{^https://github.com/}, '')
   end
 
+  def different_support_sources_see_different_tickets?
+    false
+  end
+
   def synchronize_internal_ticket(internal_ticket, external_ticket)
     super
 
