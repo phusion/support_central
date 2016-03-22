@@ -33,7 +33,7 @@ class SupportbeeSupportSourcesController < ApplicationController
   def update
     respond_to do |format|
       if @support_source.update(supportbee_support_source_params)
-        format.html { redirect_to support_sources_path,
+        format.html { redirect_to @support_source,
           notice: 'Support source was successfully updated.' }
         format.json { render :show, status: :ok, location: @support_source }
       else
