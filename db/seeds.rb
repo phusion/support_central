@@ -108,6 +108,7 @@ Ticket.transaction do
   hongli = seeder.create_user('hongli@phusion.nl')
   seeder.create_user('daniel@phusion.nl')
   seeder.create_user('tinco@phusion.nl')
+  seeder.create_user('camden@phusion.nl')
 
   if Rails.env.development?
     github = seeder.create_github_support_source(hongli, 'phusion/passenger')
