@@ -3,7 +3,8 @@ require 'yaml'
 class ConfigFileLoader
   DEFAULT_PHUSION_GITHUB_USERS = [
     'FoobarWidget',
-    'OnixGH'
+    'OnixGH',
+    'camjn'
   ]
 
   def load
