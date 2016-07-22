@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/phusion/supportbee.git
-  revision: 0b41f5c123f48f63c86c3138a8bcba5e46acf70b
+  revision: 5a7ef7f073e67f1d20b4ae609204124d9fbe5472
   specs:
     supportbee (0.0.1)
       faraday (>= 0.1.0)
