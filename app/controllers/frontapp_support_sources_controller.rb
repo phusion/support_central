@@ -1,31 +1,30 @@
-class GithubSupportSourcesController < ApplicationController
-  before_action :set_github_support_source, only: [:edit, :update, :destroy]
+class FrontappSupportSourcesController < ApplicationController
+  before_action :set_frontapp_support_source, only: [:edit, :update, :destroy]
 
-  # GET /github_support_sources/new
+  # GET /frontapp_support_sources/new
   def new
-    @support_source = GithubSupportSource.new
+    @support_source = FrontappSupportSource.new
   end
 
-  # GET /github_support_sources/1
+  # GET /frontapp_support_sources/1
   def show
     redirect_to action: :edit
   end
 
-  # GET /github_support_sources/1/edit
+  # GET /frontapp_support_sources/1/edit
   def edit
   end
 
-  # POST /github_support_sources
-  # POST /github_support_sources.json
+  # POST /frontapp_support_sources
+  # POST /frontapp_support_sources.json
   def create
-    @support_source = GithubSupportSource.new(github_support_source_params)
+    @support_source = FrontappSupportSource.new(frontapp_support_source_params)
 
     respond_to do |format|
       if @support_source.save
         format.html { redirect_to support_sources_path,
           notice: 'Support source was successfully created.' }
-        format.json { render :show, status: :created,
-          location: @support_source }
+        format.json { render :show, status: :created, location: @support_source }
       else
         format.html { render :new }
         format.json { render json: @support_source.errors,
@@ -34,12 +33,12 @@ class GithubSupportSourcesController < ApplicationController
     end
   end
 
-  # PATCH/PUT /github_support_sources/1
-  # PATCH/PUT /github_support_sources/1.json
+  # PATCH/PUT /frontapp_support_sources/1
+  # PATCH/PUT /frontapp_support_sources/1.json
   def update
     respond_to do |format|
-      if @support_source.update(github_support_source_params)
-        format.html { redirect_to edit_github_support_source_path(@support_source),
+      if @support_source.update(frontapp_support_source_params)
+        format.html { redirect_to @support_source,
           notice: 'Support source was successfully updated.' }
         format.json { render :show, status: :ok, location: @support_source }
       else
@@ -50,8 +49,8 @@ class GithubSupportSourcesController < ApplicationController
     end
   end
 
-  # DELETE /github_support_sources/1
-  # DELETE /github_support_sources/1.json
+  # DELETE /frontapp_support_sources/1
+  # DELETE /frontapp_support_sources/1.json
   def destroy
     @support_source.destroy
     respond_to do |format|
@@ -63,14 +62,15 @@ class GithubSupportSourcesController < ApplicationController
 
 private
   # Use callbacks to share common setup or constraints between actions.
-  def set_github_support_source
-    @support_source = current_user.github_support_sources.find(params[:id])
+  def set_frontapp_support_source
+    @support_source = current_user.frontapp_support_sources.find(params[:id])
   end
 
   # Never trust parameters from the scary internet, only allow the white list through.
-  def github_support_source_params
-    params.require(:github_support_source).
-      permit(:name, :github_owner_and_repo).
+  def frontapp_support_source_params
+    params.require(:frontapp_support_source).
+      permit(:name, :frontapp_auth_token,
+        :frontapp_user_id, :frontapp_inbox_ids_as_string).
       merge(user: current_user)
   end
 end

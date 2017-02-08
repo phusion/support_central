@@ -39,11 +39,14 @@ module SupportCentral
       if config.cache_classes
         Kernel.const_set(:GITHUB_SCHEDULER, GithubScheduler.new)
         Kernel.const_set(:SUPPORTBEE_SCHEDULER, SupportbeeScheduler.new)
+        Kernel.const_set(:FRONTAPP_SCHEDULER, FrontappScheduler.new)
         GITHUB_SCHEDULER.start_thread
         SUPPORTBEE_SCHEDULER.start_thread
+        FRONTAPP_SCHEDULER.start_thread
         at_exit do
           GITHUB_SCHEDULER.shutdown
           SUPPORTBEE_SCHEDULER.shutdown
+          FRONTAPP_SCHEDULER.shutdown
         end
       end
     end

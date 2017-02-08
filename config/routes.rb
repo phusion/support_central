@@ -6,6 +6,7 @@ Rails.application.routes.draw do
   resources :support_sources
   resources :supportbee_support_sources
   resources :github_support_sources
+  resources :frontapp_support_sources
 
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".
@@ -21,6 +22,7 @@ Rails.application.routes.draw do
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
   post 'admin/sync_github' => 'admin_area#sync_github'
   post 'admin/sync_supportbee' => 'admin_area#sync_supportbee'
+  post 'admin/sync_frontapp' => 'admin_area#sync_frontapp'
   get 'admin' => 'admin_area#index', as: :admin_area
   get 'admin(/:action)' => 'admin_area'
 

@@ -29,5 +29,5 @@
 
 require 'rails_helper'
 
-RSpec.describe SupportSource, type: :model do
+RSpec.describe FrontappSupportSource, type: :model do
 end

@@ -18,6 +18,10 @@
 #
 #  fk__tickets_support_source_id  (support_source_id)
 #
+# Foreign Keys
+#
+#  fk_tickets_support_source_id  (support_source_id => support_sources.id) ON DELETE => cascade ON UPDATE => cascade
+#
 
 class Ticket < ActiveRecord::Base
   enum status: { normal: 0, respond_now: 1, overdue: 2 }

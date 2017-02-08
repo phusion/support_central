@@ -27,7 +27,27 @@
 #  fk_support_sources_user_id  (user_id => users.id) ON DELETE => cascade ON UPDATE => cascade
 #
 
-require 'rails_helper'
+class FrontappSupportSource < SupportSource
+  validates :frontapp_auth_token, :frontapp_user_id, :frontapp_inbox_ids , presence: true
 
-RSpec.describe SupportSource, type: :model do
+  default_value_for :name, 'Frontapp'
+
+  def external_url(ticket)
+    "https://app.frontapp.com/open/#{ticket.external_id}"
+  end
+
+  def frontapp_inbox_ids_as_string
+    frontapp_inbox_ids.join(',')
+  end
+
+  def frontapp_inbox_ids_as_string=(value)
+    self.frontapp_inbox_ids = value.to_s.
+      split(',').
+      reject { |x| x.blank? }.
+      map { |x| x.strip }
+  end
+
+  def scheduler
+    FrontappScheduler.instance
+  end
 end

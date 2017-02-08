@@ -12,12 +12,16 @@
 </p>
 
 <div class="row">
-    <div class="col-md-5">
+    <div class="col-md-4">
         <h3>Github</h3>
         <%= render partial: 'scheduler', locals: { scheduler: GithubScheduler.instance, sync_action: 'sync_github' } %>
     </div>
-    <div class="col-md-offset-1 col-md-5">
+    <div class="col-md-4">
         <h3>Supportbee</h3>
         <%= render partial: 'scheduler', locals: { scheduler: SupportbeeScheduler.instance, sync_action: 'sync_supportbee' } %>
+    </div>
+    <div class="col-md-4">
+        <h3>Frontapp</h3>
+        <%= render partial: 'scheduler', locals: { scheduler: FrontappScheduler.instance, sync_action: 'sync_frontapp' } %>
     </div>
 </div>

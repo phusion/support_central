@@ -6,6 +6,12 @@ class SupportbeeSupportSourcesController < ApplicationController
     @support_source = SupportbeeSupportSource.new
   end
 
+
+  # GET /supportbee_support_sources/1
+  def show
+    redirect_to action: :edit
+  end
+
   # GET /supportbee_support_sources/1/edit
   def edit
   end

@@ -18,6 +18,10 @@
 #
 #  fk__tickets_support_source_id  (support_source_id)
 #
+# Foreign Keys
+#
+#  fk_tickets_support_source_id  (support_source_id => support_sources.id) ON DELETE => cascade ON UPDATE => cascade
+#
 
 FactoryGirl.define do
   ### Github issues ###
@@ -64,7 +68,7 @@ FactoryGirl.define do
     external_last_update_time 1.day.ago
   end
 
-  ### Supportbee tickets ###
+  ### Supportbee & Frontapp tickets ###
 
   factory :frequent_memory_warnings, class: 'Ticket' do
     title 'Frequent memory warnings'
