@@ -10,6 +10,7 @@ The following support channels are currently supported:
 
  * Github issue tracker
  * Supportbee
+ * Frontapp
 
 ## Github issue tracking
 
