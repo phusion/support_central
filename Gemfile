@@ -30,7 +30,7 @@ gem 'octokit'
 gem 'supportbee', github: 'phusion/supportbee'
 gem 'frontapp', github: 'phusion/frontapp'
 
-gem 'net-http-persistent'
+gem 'net-http-persistent', '~> 2.9'
 gem 'default_value_for'
 gem 'schema_associations'
 gem 'schema_auto_foreign_keys'

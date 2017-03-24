@@ -89,7 +89,6 @@ GEM
       execjs
     coffee-script-source (1.12.2)
     concurrent-ruby (1.0.4)
-    connection_pool (2.2.1)
     crack (0.4.3)
       safe_yaml (~> 1.0.0)
     database_cleaner (1.5.3)
@@ -151,8 +150,7 @@ GEM
       key_struct (~> 0.4)
     multi_json (1.12.1)
     multipart-post (2.0.0)
-    net-http-persistent (3.0.0)
-      connection_pool (~> 2.2)
+    net-http-persistent (2.9.4)
     net-scp (1.2.1)
       net-ssh (>= 2.6.5)
     net-ssh (4.0.1)
@@ -327,7 +325,7 @@ DEPENDENCIES
   frontapp!
   jbuilder (~> 2.0)
   jquery-rails
-  net-http-persistent
+  net-http-persistent (~> 2.9)
   octokit
   pg
   quiet_assets
