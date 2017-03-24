@@ -9,7 +9,7 @@ protected
   def get_data_sources
     data_sources = {}
     @support_sources.each do |support_source|
-      key = support_source.frontapp_auth_token
+      key = [support_source.frontapp_user_id, support_source.frontapp_auth_token]
       data_sources[key] ||= DataSource.new(support_source.frontapp_auth_token,
         support_source.frontapp_inbox_ids, support_source.id)
     end

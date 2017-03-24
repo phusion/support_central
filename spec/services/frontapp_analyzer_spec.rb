@@ -14,11 +14,6 @@ describe FrontappAnalyzer do
   let(:support_inbox) { 'inb1' }
   let(:union_station_support_inbox) { 'inb2' }
 
-  def create_dependencies
-    @user = create(:user)
-    @frontapp = create(:frontapp, user: @user)
-  end
-
   def stub_frontapp_request(inbox, assignment, body, auth_token = 1234)
     url = "https://api2.frontapp.com/inboxes/#{inbox}/conversations?#{assignment}"
     if !body.is_a?(String)
@@ -56,8 +51,12 @@ describe FrontappAnalyzer do
   end
 
   context 'when there is one user' do
+    before :each do
+      @user = create(:user)
+      @frontapp = create(:frontapp, user: @user)
+    end
+
     it 'deletes internal tickets for which the corresponding Frontapp ticket has already been answered' do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
       @bundle_install_error = create(:bundle_install_error,
@@ -93,7 +92,6 @@ describe FrontappAnalyzer do
     end
 
     it 'deletes internal tickets for which there is no corresponding Frontapp ticket' do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
       @bundle_install_error = create(:bundle_install_error,
@@ -123,7 +121,6 @@ describe FrontappAnalyzer do
     it 'deletes internal tickets for which the corresponding Frontapp ticket has been reassigned ' \
       'to a team that the current user is not part of' \
     do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
       @bundle_install_error = create(:bundle_install_error,
@@ -172,7 +169,6 @@ describe FrontappAnalyzer do
     end
 
     it 'deletes all internal tickets if there are no unanswered Frontapp tickets' do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
       @bundle_install_error = create(:bundle_install_error,
@@ -195,7 +191,6 @@ describe FrontappAnalyzer do
     end
 
     it 'creates internal tickets for not-seen-before unanswered Frontapp tickets' do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
 
@@ -245,7 +240,6 @@ describe FrontappAnalyzer do
     end
 
     it 'does not touch existing tickets for unanswered Frontapp tickets' do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
       @bundle_install_error = create(:bundle_install_error,
@@ -278,7 +272,6 @@ describe FrontappAnalyzer do
     end
 
     it 'does not touch tickets not belonging to FrontappSupportSource' do
-      create_dependencies
       @github = create(:github_passenger, user: @user)
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @github)
@@ -308,7 +301,6 @@ describe FrontappAnalyzer do
     it "sets a ticket's status to 'respond_now' if the corresponding " \
        "Frontapp ticket has the 'respond now' label" \
     do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
 
@@ -331,7 +323,6 @@ describe FrontappAnalyzer do
     it "sets a ticket's status to 'overdue' if the corresponding " \
        "Frontapp ticket has the 'overdue' label" \
     do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
 
@@ -354,7 +345,6 @@ describe FrontappAnalyzer do
     it "sets a ticket's status to 'overdue' if the corresponding " \
        "Frontapp ticket has both the 'respond now' and 'overdue' labels" \
     do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
 
@@ -376,7 +366,6 @@ describe FrontappAnalyzer do
     it "sets a ticket's status to 'normal' if the corresponding " \
        "Frontapp ticket has neither the 'respond now' nor the 'overdue' label" \
     do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         status: 'overdue',
         support_source: @frontapp)
@@ -396,7 +385,6 @@ describe FrontappAnalyzer do
     end
 
     it "saves the Frontapp's ticket's labels except for 'respond now' and 'overdue'" do
-      create_dependencies
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp)
 
@@ -426,13 +414,13 @@ describe FrontappAnalyzer do
       @user = create(:user)
       @frontapp_hongli = create(:frontapp,
         name: 'Supportbee Hongli',
-        frontapp_auth_token: 'hongli',
+        frontapp_auth_token: 'shared',
         frontapp_user_id: 1234,
         frontapp_inbox_ids: [support_inbox],
         user: @user)
       @frontapp_tinco = create(:frontapp,
         name: 'Supportbee Tinco',
-        frontapp_auth_token: 'tinco',
+        frontapp_auth_token: 'shared',
         frontapp_user_id: 1235,
         frontapp_inbox_ids: [support_inbox, union_station_support_inbox],
         user: @user)
@@ -450,18 +438,14 @@ describe FrontappAnalyzer do
         @frontapp_hongli.frontapp_auth_token)
 
       # API requests by Tinco
-      stub2 = stub_frontapp_request(support_inbox, 'q[statuses][0]=unassigned&q[statuses][1]=assigned',
-        make_tickets_array([]),
-        @frontapp_tinco.frontapp_auth_token)
-      stub3 = stub_frontapp_request(union_station_support_inbox, 'q[statuses][0]=unassigned&q[statuses][1]=assigned',
+      stub2 = stub_frontapp_request(union_station_support_inbox, 'q[statuses][0]=unassigned&q[statuses][1]=assigned',
         make_tickets_array([ticket_as_json(@frequent_memory_warnings)]),
         @frontapp_tinco.frontapp_auth_token)
 
       FrontappAnalyzer.new.analyze
 
-      assert_requested(stub1)
+      assert_requested(stub1, times: 2) # 2 times, because the api key is shared
       assert_requested(stub2)
-      assert_requested(stub3)
       expect(Ticket.count).to eq(2)
     end
   end
