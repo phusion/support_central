@@ -412,6 +412,7 @@ describe FrontappAnalyzer do
   context 'given two support sources, one with and one without internal tickets' do
     before :each do
       @user = create(:user)
+      @user2 = create(:user2)
       @frontapp_hongli = create(:frontapp,
         name: 'Supportbee Hongli',
         frontapp_auth_token: 'shared',
@@ -423,7 +424,7 @@ describe FrontappAnalyzer do
         frontapp_auth_token: 'shared',
         frontapp_user_id: 1235,
         frontapp_inbox_ids: [support_inbox, union_station_support_inbox],
-        user: @user)
+        user: @user2)
     end
 
     specify 'if there are unanswered external tickets, it creates internal tickets ' \
@@ -431,6 +432,8 @@ describe FrontappAnalyzer do
     do
       @frequent_memory_warnings = create(:frequent_memory_warnings,
         support_source: @frontapp_hongli)
+      @bundle_install_error = create(:bundle_install_error,
+        support_source: @frontapp_tinco)
 
       # API requests by Hongli
       stub1 = stub_frontapp_request(support_inbox, 'q[statuses][0]=unassigned&q[statuses][1]=assigned',
@@ -439,14 +442,14 @@ describe FrontappAnalyzer do
 
       # API requests by Tinco
       stub2 = stub_frontapp_request(union_station_support_inbox, 'q[statuses][0]=unassigned&q[statuses][1]=assigned',
-        make_tickets_array([ticket_as_json(@frequent_memory_warnings)]),
+        make_tickets_array([ticket_as_json(@bundle_install_error)]),
         @frontapp_tinco.frontapp_auth_token)
 
       FrontappAnalyzer.new.analyze
 
       assert_requested(stub1, times: 2) # 2 times, because the api key is shared
       assert_requested(stub2)
-      expect(Ticket.count).to eq(2)
+      expect(Ticket.count).to eq(3)
     end
   end
 end

@@ -67,17 +67,7 @@ protected
   end
 
   def support_sources_eligible_for_external_ticket(external_ticket)
-    assignee = external_ticket['assignee']
-    if assignee
-      if assignee['email']
-        user_id = assignee['email']
-        @support_sources.find_all do |support_source|
-          support_source.frontapp_user_id == user_id
-        end
-      end
-    else
-      @support_sources
-    end
+    @support_sources.find_all {|s| external_ticket[:support_source_ids].include?(s.id)}
   end
 
 private

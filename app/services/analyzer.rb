@@ -71,7 +71,10 @@ private
   def index_external_tickets(external_tickets)
     index = {}
     external_tickets.each do |ticket|
-      index[id_for_external_ticket(ticket)] = ticket
+      id = id_for_external_ticket(ticket)
+      index[id] ||= ticket
+      index[id][:support_source_ids] ||= Set.new
+      index[id][:support_source_ids] << ticket[:support_source_id]
     end
     index
   end
