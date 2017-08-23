@@ -1,4 +1,8 @@
 <li class="ticket">
+    <div class="ticket-checkbox">
+        <input type="checkbox" class="form-control" data-ticket-id="<%= ticket.id %>">
+    </div>
+
     <%= link_to ticket.external_url, target: '_blank', class: 'ticket-link' do %>
         <span class="arrow" aria-hidden="true">
             <span class="glyphicon glyphicon-chevron-right"></span>

@@ -11,9 +11,16 @@
     }
 }
 
+.ticket-checkbox {
+    display: inline-block;
+    position: absolute;
+    width: 25px;
+    left: 8px;
+}
+
 .ticket-link {
     display: block;
-    padding: 0.75em 15px;
+    padding: 0.75em 35px;
     color: black;
     text-decoration: none;
 

@@ -1,8 +1,15 @@
 <div role="tabpanel" class="tab-pane support-source <%= 'active' if support_source_counter == 0 %>" id="support_source_<%= support_source.id %>">
 
+    <div class="support-source-tab-panel-tools">
+        Selection tools:
+        <a href="javascript:void(selectAll(<%= support_source.id %>))" class="tool">Select all</a>
+        <a href="javascript:void(selectNone(<%= support_source.id %>))" class="tool">Select none</a>
+        <a href="javascript:void(ignoreSelectedTickets(<%= support_source.id %>))" class="tool">Ignore selected</a>
+    </div>
+
     <% if support_source.scheduler.working? %>
         <div class="support-source-announcement">
-            <div class="alert alert-info">This support source is being synchronized. <a href="javascript:void(location.refresh())" class="alert-link">Reload this page</a> in a few minutes to check for updates.</div>
+            <div class="alert alert-info">This support source is being synchronized. <a href="javascript:void(window.location.reload())" class="alert-link">Reload this page</a> in a few minutes to check for updates.</div>
         </div>
     <% end %>
 

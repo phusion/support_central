@@ -25,4 +25,6 @@ class User < ActiveRecord::Base
   has_many :supportbee_support_sources
   has_many :frontapp_support_sources
   has_many :rss_support_sources
+
+  has_many :tickets, through: 'support_sources'
 end

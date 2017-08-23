@@ -10,6 +10,8 @@ class Analyzer
       end
 
       @unanswered_external_tickets = fetch_unanswered_external_tickets
+      @unanswered_external_tickets = filter_ignored_external_tickets(
+        @unanswered_external_tickets)
       @unanswered_external_tickets_index = index_external_tickets(
         @unanswered_external_tickets)
       @unanswered_external_ticket_ids = @unanswered_external_tickets_index.keys
@@ -68,6 +70,22 @@ protected
   end
 
 private
+  def filter_ignored_external_tickets(external_tickets)
+    external_ids = external_tickets.map do |ticket|
+      id_for_external_ticket(ticket)
+    end
+
+    ignored_external_ids = Set.new(
+      IgnoreMarker.
+        where(support_source_type: support_source_class.to_s).
+        where('external_id IN (?)', external_ids).
+        pluck(:external_id))
+
+    external_tickets.find_all do |ticket|
+      !ignored_external_ids.include?(id_for_external_ticket(ticket))
+    end
+  end
+
   def index_external_tickets(external_tickets)
     index = {}
     external_tickets.each do |ticket|

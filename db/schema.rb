@@ -11,10 +11,17 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170823102102) do
+ActiveRecord::Schema.define(version: 20170823113902) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
+
+  create_table "ignore_markers", force: :cascade do |t|
+    t.string   "support_source_type", :null=>false, :index=>{:name=>"index_ignore_markers_on_support_source_type_and_external_id", :with=>["external_id"], :unique=>true, :using=>:btree}
+    t.string   "external_id",         :null=>false
+    t.datetime "created_at",          :null=>false
+    t.datetime "updated_at",          :null=>false
+  end
 
   create_table "users", force: :cascade do |t|
     t.string   "email",                  :default=>"", :null=>false, :index=>{:name=>"index_users_on_email", :unique=>true, :using=>:btree}
