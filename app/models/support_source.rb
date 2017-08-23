@@ -17,6 +17,7 @@
 #  frontapp_auth_token   :string
 #  frontapp_inbox_ids    :text             default([]), is an Array
 #  rss_url               :string
+#  position              :integer
 #
 # Indexes
 #
@@ -31,6 +32,8 @@
 class SupportSource < ActiveRecord::Base
   has_many :tickets, -> { order('status DESC, display_id, external_last_update_time DESC') },
     inverse_of: 'support_source'
+
+  acts_as_list scope: :user
 
   def type_name
     self.class.to_s.sub(/SupportSource$/, '')
