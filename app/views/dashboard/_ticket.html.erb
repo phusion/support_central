@@ -15,8 +15,12 @@
             <% end %>
         </span>
         <span class="meta">
-            <%= ticket.display_id_with_hash_prefix %>,
-            last update
+            <% if ticket.display_id %>
+                <%= ticket.display_id_with_hash_prefix %>,
+                last update
+            <% else %>
+                Last update
+            <% end %>
             <%= distance_of_time_in_words_to_now(ticket.external_last_update_time) %> ago
         </span>
     <% end %>

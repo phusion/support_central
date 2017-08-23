@@ -16,6 +16,7 @@
 #  frontapp_user_id      :string
 #  frontapp_auth_token   :string
 #  frontapp_inbox_ids    :text             default([]), is an Array
+#  rss_url               :string
 #
 # Indexes
 #
@@ -28,7 +29,7 @@
 #
 
 class SupportSource < ActiveRecord::Base
-  has_many :tickets, -> { order('status DESC, display_id') },
+  has_many :tickets, -> { order('status DESC, display_id, external_last_update_time DESC') },
     inverse_of: 'support_source'
 
   def type_name

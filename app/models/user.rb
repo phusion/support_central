@@ -24,4 +24,5 @@ class User < ActiveRecord::Base
   has_many :github_support_sources
   has_many :supportbee_support_sources
   has_many :frontapp_support_sources
+  has_many :rss_support_sources
 end

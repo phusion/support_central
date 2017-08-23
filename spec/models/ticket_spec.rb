@@ -7,7 +7,7 @@
 #  title                     :string           not null
 #  status                    :integer          default(0), not null
 #  labels                    :text             default([]), is an Array
-#  display_id                :string           not null
+#  display_id                :string
 #  data                      :text
 #  external_id               :string           not null
 #  external_last_update_time :datetime         not null

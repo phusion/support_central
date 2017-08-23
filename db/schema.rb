@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20170207110736) do
+ActiveRecord::Schema.define(version: 20170823083209) do
 
   # These are extensions that must be enabled in order to support this database
   enable_extension "plpgsql"
@@ -40,6 +40,7 @@ ActiveRecord::Schema.define(version: 20170207110736) do
     t.string   "frontapp_user_id"
     t.string   "frontapp_auth_token"
     t.text     "frontapp_inbox_ids",    :default=>[], :array=>true
+    t.string   "rss_url"
   end
   add_index "support_sources", ["user_id", "name"], :name=>"index_support_sources_on_user_id_and_name", :unique=>true, :using=>:btree
 
@@ -48,7 +49,7 @@ ActiveRecord::Schema.define(version: 20170207110736) do
     t.string   "title",                     :null=>false
     t.integer  "status",                    :default=>0, :null=>false
     t.text     "labels",                    :default=>[], :array=>true
-    t.string   "display_id",                :null=>false
+    t.string   "display_id"
     t.text     "data"
     t.string   "external_id",               :null=>false
     t.datetime "external_last_update_time", :null=>false

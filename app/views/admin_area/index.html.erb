@@ -24,4 +24,8 @@
         <h3>Frontapp</h3>
         <%= render partial: 'scheduler', locals: { scheduler: FrontappScheduler.instance, sync_action: 'sync_frontapp' } %>
     </div>
+    <div class="col-md-4">
+        <h3>RSS</h3>
+        <%= render partial: 'scheduler', locals: { scheduler: RssScheduler.instance, sync_action: 'sync_rss' } %>
+    </div>
 </div>

@@ -7,6 +7,7 @@ require 'rails/all'
 Bundler.require(*Rails.groups)
 
 require_relative '../lib/config_file_loader'
+require_relative '../lib/thread_pool'
 CONFIG = ConfigFileLoader.new.load
 
 Faraday.default_adapter = :net_http_persistent
@@ -40,13 +41,16 @@ module SupportCentral
         Kernel.const_set(:GITHUB_SCHEDULER, GithubScheduler.new)
         Kernel.const_set(:SUPPORTBEE_SCHEDULER, SupportbeeScheduler.new)
         Kernel.const_set(:FRONTAPP_SCHEDULER, FrontappScheduler.new)
+        Kernel.const_set(:RSS_SCHEDULER, RssScheduler.new)
         GITHUB_SCHEDULER.start_thread
         SUPPORTBEE_SCHEDULER.start_thread
         FRONTAPP_SCHEDULER.start_thread
+        RSS_SCHEDULER.start_thread
         at_exit do
           GITHUB_SCHEDULER.shutdown
           SUPPORTBEE_SCHEDULER.shutdown
           FRONTAPP_SCHEDULER.shutdown
+          RSS_SCHEDULER.shutdown
         end
       end
     end

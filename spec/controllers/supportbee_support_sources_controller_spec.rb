@@ -16,6 +16,7 @@
 #  frontapp_user_id      :string
 #  frontapp_auth_token   :string
 #  frontapp_inbox_ids    :text             default([]), is an Array
+#  rss_url               :string
 #
 # Indexes
 #

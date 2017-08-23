@@ -7,7 +7,7 @@
 #  title                     :string           not null
 #  status                    :integer          default(0), not null
 #  labels                    :text             default([]), is an Array
-#  display_id                :string           not null
+#  display_id                :string
 #  data                      :text
 #  external_id               :string           not null
 #  external_last_update_time :datetime         not null
@@ -28,7 +28,7 @@ class Ticket < ActiveRecord::Base
 
   def display_id_with_hash_prefix
     result = display_id
-    if result =~ /^\d/
+    if !result.nil? && result =~ /^\d/
       result = "##{result}"
     end
     result

@@ -28,7 +28,14 @@
 #  fk_support_sources_user_id  (user_id => users.id) ON DELETE => cascade ON UPDATE => cascade
 #
 
-require 'rails_helper'
+class RssSupportSource < SupportSource
+  validates :rss_url, presence: true
 
-RSpec.describe FrontappSupportSource, type: :model do
+  def external_url(ticket)
+    ticket.external_id
+  end
+
+  def scheduler
+    RssScheduler.instance
+  end
 end

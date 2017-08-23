@@ -11,6 +11,10 @@ class AdminAreaController < ApplicationController
     sync_scheduler(FrontappScheduler.instance, 'Frontapp')
   end
 
+  def sync_rss
+    sync_scheduler(RssScheduler.instance, 'RSS')
+  end
+
 private
   def sync_scheduler(scheduler, source_name)
     if SupportCentral::Application.config.cache_classes
