@@ -24,6 +24,7 @@ Rails.application.routes.draw do
   post 'admin/sync_github' => 'admin_area#sync_github'
   post 'admin/sync_supportbee' => 'admin_area#sync_supportbee'
   post 'admin/sync_frontapp' => 'admin_area#sync_frontapp'
+  post 'admin/sync_rss' => 'admin_area#sync_rss'
   get 'admin' => 'admin_area#index', as: :admin_area
   get 'admin(/:action)' => 'admin_area'
 
