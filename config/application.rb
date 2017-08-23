@@ -37,20 +37,31 @@ module SupportCentral
     config.active_record.raise_in_transactional_callbacks = true
 
     config.after_initialize do
+      schedulers = {
+        GITHUB_SCHEDULER: GithubScheduler,
+        SUPPORTBEE_SCHEDULER: SupportbeeScheduler,
+        FRONTAPP_SCHEDULER: FrontappScheduler,
+        RSS_SCHEDULER: RssScheduler
+      }
+
       if config.cache_classes
-        Kernel.const_set(:GITHUB_SCHEDULER, GithubScheduler.new)
-        Kernel.const_set(:SUPPORTBEE_SCHEDULER, SupportbeeScheduler.new)
-        Kernel.const_set(:FRONTAPP_SCHEDULER, FrontappScheduler.new)
-        Kernel.const_set(:RSS_SCHEDULER, RssScheduler.new)
-        GITHUB_SCHEDULER.start_thread
-        SUPPORTBEE_SCHEDULER.start_thread
-        FRONTAPP_SCHEDULER.start_thread
-        RSS_SCHEDULER.start_thread
-        at_exit do
-          GITHUB_SCHEDULER.shutdown
-          SUPPORTBEE_SCHEDULER.shutdown
-          FRONTAPP_SCHEDULER.shutdown
-          RSS_SCHEDULER.shutdown
+        schedulers.each_pair do |name, klass|
+          scheduler = klass.new
+          Kernel.const_set(name, scheduler)
+          if defined?(PhusionPassenger)
+            PhusionPassenger.on_event(:starting_worker_process) do |forked|
+              scheduler.start_thread
+            end
+          elsif defined?(Spring)
+            Spring.after_fork do
+              scheduler.start_thread
+            end
+          else
+            scheduler.start_thread
+          end
+          at_exit do
+            scheduler.shutdown
+          end
         end
       end
     end
