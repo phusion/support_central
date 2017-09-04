@@ -107,7 +107,6 @@ seeder = SeedUtils.new
 Ticket.transaction do
   hongli = seeder.create_user('hongli@phusion.nl')
   seeder.create_user('daniel@phusion.nl')
-  seeder.create_user('tinco@phusion.nl')
   seeder.create_user('camden@phusion.nl')
   seeder.create_user('niels@phusion.nl')
 
