@@ -1,2 +1,0 @@
-module Webhooks::GithubWebhookHelper
-end

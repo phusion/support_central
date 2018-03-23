@@ -1,8 +1,0 @@
-production:
-  adapter: postgresql
-  host: localhost
-  username: foo
-  password: bar
-  database: support_central
-  pool: 5
-  timeout: 5000

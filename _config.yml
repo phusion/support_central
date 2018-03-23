@@ -1,1 +1,13 @@
-theme: jekyll-theme-cayman
+# Site settings
+title: Traveling Ruby
+email: info@phusion.nl
+baseurl: "/traveling-ruby" # the subpath of your site, e.g. /blog/
+
+# Build settings
+markdown: kramdown
+
+exclude:
+  - foo
+  - osx
+  - linux
+  - '*.tar.gz'
