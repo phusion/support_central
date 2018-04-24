@@ -13,7 +13,7 @@
 #  index_ignore_markers_on_support_source_type_and_external_id  (support_source_type,external_id) UNIQUE
 #
 
-class IgnoreMarker < ActiveRecord::Base
+class IgnoreMarker < ApplicationRecord
   def self.ignore(tickets)
     transaction do
       tickets.each do |ticket|

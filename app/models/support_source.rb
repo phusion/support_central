@@ -29,7 +29,7 @@
 #  fk_support_sources_user_id  (user_id => users.id) ON DELETE => cascade ON UPDATE => cascade
 #
 
-class SupportSource < ActiveRecord::Base
+class SupportSource < ApplicationRecord
   has_many :tickets, -> { order('status DESC, display_id, external_last_update_time DESC') },
     inverse_of: 'support_source'
 

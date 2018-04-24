@@ -56,7 +56,7 @@ RSpec.describe SupportSourcesController, type: :controller do
       @user = create(:user)
       sign_in(@user)
       @source = create(:github_passenger, user: @user)
-      get :edit, id: @source.to_param
+      get :edit, params: { id: @source.to_param }
       expect(response).to redirect_to(edit_github_support_source_url(@source))
     end
   end
@@ -70,12 +70,12 @@ RSpec.describe SupportSourcesController, type: :controller do
 
     it "destroys the requested support source" do
       expect {
-        delete :destroy, id: @source.to_param
+        delete :destroy, params: { id: @source.to_param }
       }.to change(SupportSource, :count).by(-1)
     end
 
     it "redirects to the support sources list" do
-      delete :destroy, id: @source.to_param
+      delete :destroy, params: { id: @source.to_param }
       expect(response).to redirect_to(support_sources_url)
     end
   end

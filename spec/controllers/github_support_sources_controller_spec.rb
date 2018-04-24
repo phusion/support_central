@@ -59,7 +59,7 @@ RSpec.describe GithubSupportSourcesController, type: :controller do
       @user = create(:user)
       sign_in(@user)
       @source = create(:github_passenger, user: @user)
-      get :edit, id: @source.to_param
+      get :edit, params: { id: @source.to_param }
       expect(assigns(:support_source)).to eq(@source)
     end
   end
@@ -73,30 +73,30 @@ RSpec.describe GithubSupportSourcesController, type: :controller do
     context "with valid params" do
       it "creates a new GithubSupportSource" do
         expect {
-          post :create, :github_support_source => valid_attributes
+          post :create, params: { github_support_source: valid_attributes }
         }.to change(GithubSupportSource, :count).by(1)
       end
 
       it "assigns a newly created support source as @support_source" do
-        post :create, :github_support_source => valid_attributes
+        post :create, params: { github_support_source: valid_attributes }
         expect(assigns(:support_source)).to be_a(GithubSupportSource)
         expect(assigns(:support_source)).to be_persisted
       end
 
       it "redirects to the support source listing" do
-        post :create, :github_support_source => valid_attributes
+        post :create, params: { github_support_source: valid_attributes }
         expect(response).to redirect_to(support_sources_url)
       end
     end
 
     context "with invalid params" do
       it "assigns a newly created but unsaved support source as @support_source" do
-        post :create, :github_support_source => invalid_attributes
+        post :create, params: { github_support_source: invalid_attributes }
         expect(assigns(:support_source)).to be_a_new(GithubSupportSource)
       end
 
       it "re-renders the 'new' template" do
-        post :create, :github_support_source => invalid_attributes
+        post :create, params: { github_support_source: invalid_attributes }
         expect(response).to render_template("new")
       end
     end
@@ -118,31 +118,31 @@ RSpec.describe GithubSupportSourcesController, type: :controller do
 
     context "with valid params" do
       it "updates the requested support source" do
-        put :update, id: @source.to_param, github_support_source: new_attributes
+        put :update, params: { id: @source.to_param, github_support_source: new_attributes }
         @source.reload
         expect(@source.name).to eq('New name')
         expect(@source.github_owner_and_repo).to eq('phusion/unicorn')
       end
 
       it "assigns the requested support source as @support_source" do
-        put :update, id: @source.to_param, github_support_source: new_attributes
+        put :update, params: { id: @source.to_param, github_support_source: new_attributes }
         expect(assigns(:support_source)).to eq(@source)
       end
 
       it "redirects to the support source editing page" do
-        put :update, id: @source.to_param, github_support_source: new_attributes
+        put :update, params: { id: @source.to_param, github_support_source: new_attributes }
         expect(response).to redirect_to(edit_github_support_source_url(@source))
       end
     end
 
     context "with invalid params" do
       it "assigns the support source as @support_source" do
-        put :update, id: @source.to_param, github_support_source: invalid_attributes
+        put :update, params: { id: @source.to_param, github_support_source: invalid_attributes }
         expect(assigns(:support_source)).to eq(@source)
       end
 
       it "re-renders the 'edit' template" do
-        put :update, id: @source.to_param, github_support_source: invalid_attributes
+        put :update, params: { id: @source.to_param, github_support_source: invalid_attributes }
         expect(response).to render_template('edit')
       end
     end
@@ -157,12 +157,12 @@ RSpec.describe GithubSupportSourcesController, type: :controller do
 
     it "destroys the requested support source" do
       expect {
-        delete :destroy, id: @source.to_param
+        delete :destroy, params: { id: @source.to_param }
       }.to change(GithubSupportSource, :count).by(-1)
     end
 
     it "redirects to the source source list" do
-      delete :destroy, id: @source.to_param
+      delete :destroy, params: { id: @source.to_param }
       expect(response).to redirect_to(support_sources_url)
     end
   end
