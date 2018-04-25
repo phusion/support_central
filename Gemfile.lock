@@ -1,12 +1,23 @@
 GIT
-  remote: git://github.com/phusion/frontapp.git
+  remote: https://github.com/phusion/frontapp
   revision: a49536f1398a30dd266e773b824ef733e97ded27
   specs:
     frontapp (0.0.1)
       http (>= 2.2.1)
 
 GIT
-  remote: git://github.com/phusion/supportbee.git
+  remote: https://github.com/phusion/schema_plus_foreign_keys
+  revision: 78095d0bee69e6e77d1a6773ebbc94bb1a632e13
+  specs:
+    schema_plus_foreign_keys (0.1.7)
+      activerecord (>= 4.2)
+      its-it (~> 1.2)
+      schema_plus_compatibility (~> 0.2)
+      schema_plus_core
+      valuable
+
+GIT
+  remote: https://github.com/phusion/supportbee
   revision: 5a7ef7f073e67f1d20b4ae609204124d9fbe5472
   specs:
     supportbee (0.0.1)
@@ -15,39 +26,39 @@ GIT
 GEM
   remote: https://rubygems.org/
   specs:
-    actioncable (5.0.7)
-      actionpack (= 5.0.7)
-      nio4r (>= 1.2, < 3.0)
+    actioncable (5.1.6)
+      actionpack (= 5.1.6)
+      nio4r (~> 2.0)
       websocket-driver (~> 0.6.1)
-    actionmailer (5.0.7)
-      actionpack (= 5.0.7)
-      actionview (= 5.0.7)
-      activejob (= 5.0.7)
+    actionmailer (5.1.6)
+      actionpack (= 5.1.6)
+      actionview (= 5.1.6)
+      activejob (= 5.1.6)
       mail (~> 2.5, >= 2.5.4)
       rails-dom-testing (~> 2.0)
-    actionpack (5.0.7)
-      actionview (= 5.0.7)
-      activesupport (= 5.0.7)
+    actionpack (5.1.6)
+      actionview (= 5.1.6)
+      activesupport (= 5.1.6)
       rack (~> 2.0)
-      rack-test (~> 0.6.3)
+      rack-test (>= 0.6.3)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.0.2)
-    actionview (5.0.7)
-      activesupport (= 5.0.7)
+    actionview (5.1.6)
+      activesupport (= 5.1.6)
       builder (~> 3.1)
-      erubis (~> 2.7.0)
+      erubi (~> 1.4)
       rails-dom-testing (~> 2.0)
       rails-html-sanitizer (~> 1.0, >= 1.0.3)
-    activejob (5.0.7)
-      activesupport (= 5.0.7)
+    activejob (5.1.6)
+      activesupport (= 5.1.6)
       globalid (>= 0.3.6)
-    activemodel (5.0.7)
-      activesupport (= 5.0.7)
-    activerecord (5.0.7)
-      activemodel (= 5.0.7)
-      activesupport (= 5.0.7)
-      arel (~> 7.0)
-    activesupport (5.0.7)
+    activemodel (5.1.6)
+      activesupport (= 5.1.6)
+    activerecord (5.1.6)
+      activemodel (= 5.1.6)
+      activesupport (= 5.1.6)
+      arel (~> 8.0)
+    activesupport (5.1.6)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
@@ -61,7 +72,7 @@ GEM
     annotate (2.7.3)
       activerecord (>= 3.2, < 6.0)
       rake (>= 10.4, < 13.0)
-    arel (7.1.4)
+    arel (8.0.0)
     awesome_print (1.8.0)
     bcrypt (3.1.11)
     bcrypt_pbkdf (1.0.0)
@@ -86,9 +97,9 @@ GEM
     capistrano-rvm (0.1.2)
       capistrano (~> 3.0)
       sshkit (~> 1.2)
-    coffee-rails (4.1.1)
+    coffee-rails (4.2.2)
       coffee-script (>= 2.2.0)
-      railties (>= 4.0.0, < 5.1.x)
+      railties (>= 4.0.0)
     coffee-script (2.4.1)
       coffee-script-source
       execjs
@@ -109,7 +120,7 @@ GEM
     diff-lcs (1.3)
     domain_name (0.5.20180417)
       unf (>= 0.0.5, < 1.0.0)
-    erubis (2.7.0)
+    erubi (1.7.1)
     execjs (2.7.0)
     factory_bot (4.8.2)
       activesupport (>= 3.0.0)
@@ -122,7 +133,7 @@ GEM
     globalid (0.4.1)
       activesupport (>= 4.2.0)
     hashdiff (0.3.7)
-    http (3.2.0)
+    http (3.2.1)
       addressable (~> 2.3)
       http-cookie (~> 1.0)
       http-form_data (~> 2.0)
@@ -175,19 +186,19 @@ GEM
     power_assert (1.1.1)
     public_suffix (3.0.2)
     rack (2.0.5)
-    rack-test (0.6.3)
-      rack (>= 1.0)
-    rails (5.0.7)
-      actioncable (= 5.0.7)
-      actionmailer (= 5.0.7)
-      actionpack (= 5.0.7)
-      actionview (= 5.0.7)
-      activejob (= 5.0.7)
-      activemodel (= 5.0.7)
-      activerecord (= 5.0.7)
-      activesupport (= 5.0.7)
+    rack-test (1.0.0)
+      rack (>= 1.0, < 3)
+    rails (5.1.6)
+      actioncable (= 5.1.6)
+      actionmailer (= 5.1.6)
+      actionpack (= 5.1.6)
+      actionview (= 5.1.6)
+      activejob (= 5.1.6)
+      activemodel (= 5.1.6)
+      activerecord (= 5.1.6)
+      activesupport (= 5.1.6)
       bundler (>= 1.3.0)
-      railties (= 5.0.7)
+      railties (= 5.1.6)
       sprockets-rails (>= 2.0.0)
     rails-controller-testing (1.0.2)
       actionpack (~> 5.x, >= 5.0.1)
@@ -198,9 +209,9 @@ GEM
       nokogiri (>= 1.6)
     rails-html-sanitizer (1.0.4)
       loofah (~> 2.2, >= 2.2.2)
-    railties (5.0.7)
-      actionpack (= 5.0.7)
-      activesupport (= 5.0.7)
+    railties (5.1.6)
+      actionpack (= 5.1.6)
+      activesupport (= 5.1.6)
       method_source
       rake (>= 0.8.7)
       thor (>= 0.18.1, < 2.0)
@@ -255,10 +266,6 @@ GEM
       faraday (~> 0.8, < 1.0)
     schema_associations (1.2.6)
       schema_plus_foreign_keys (~> 0.1)
-    schema_auto_foreign_keys (0.1.3)
-      its-it (~> 1.2)
-      schema_plus_foreign_keys (~> 0.1)
-      schema_plus_indexes (~> 0.2)
     schema_monkey (2.1.5)
       activerecord (>= 4.2)
       modware (~> 0.1)
@@ -274,12 +281,6 @@ GEM
       activerecord (~> 5.0)
       its-it (~> 1.2)
       schema_monkey (~> 2.1)
-    schema_plus_foreign_keys (0.1.7)
-      activerecord (>= 4.2, < 5.1)
-      its-it (~> 1.2)
-      schema_plus_compatibility (~> 0.2)
-      schema_plus_core
-      valuable
     schema_plus_indexes (0.3.0)
       activerecord (>= 4.2, < 5.2)
       its-it (~> 1.2)
@@ -352,7 +353,7 @@ DEPENDENCIES
   capistrano-passenger
   capistrano-rails
   capistrano-rvm
-  coffee-rails (~> 4.1.0)
+  coffee-rails (~> 4.2)
   concurrent-ruby
   database_cleaner
   default_value_for
@@ -364,7 +365,7 @@ DEPENDENCIES
   net-http-persistent (~> 2.9)
   octokit
   pg
-  rails (~> 5.0.0)
+  rails (~> 5.1.0)
   rails-controller-testing
   rbnacl (>= 3.2, < 5.0)
   rbnacl-libsodium
@@ -372,7 +373,7 @@ DEPENDENCIES
   rspec-rails
   sass-rails (~> 5.0)
   schema_associations
-  schema_auto_foreign_keys
+  schema_plus_foreign_keys!
   schema_validations
   sdoc (~> 0.4.0)
   spring
