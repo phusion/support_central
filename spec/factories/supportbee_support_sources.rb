@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :supportbee, class: 'SupportbeeSupportSource' do
     name 'phusion'
     supportbee_company_id 'phusion'

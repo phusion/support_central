@@ -23,7 +23,7 @@
 #  fk_tickets_support_source_id  (support_source_id => support_sources.id) ON DELETE => cascade ON UPDATE => cascade
 #
 
-FactoryGirl.define do
+FactoryBot.define do
   ### Github issues ###
 
   factory :passenger_crash_monday, class: 'Ticket' do

@@ -17,7 +17,7 @@
 #  index_users_on_reset_password_token  (reset_password_token) UNIQUE
 #
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :user do
     email 'user@example.com'
     password '12345678'

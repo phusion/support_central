@@ -9,7 +9,7 @@ To contribute to Support Central, write some code and send a pull request. Pleas
 
 ## Setting up a development environment
 
-Support Central is written in Rails 4 and uses RSpec for tests. It requires PostgreSQL, even in development.
+Support Central is written in Rails 5 and uses RSpec for tests. It requires PostgreSQL, even in development.
 
  1. Create configuration files:
 

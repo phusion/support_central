@@ -23,7 +23,7 @@
 #  fk_tickets_support_source_id  (support_source_id => support_sources.id) ON DELETE => cascade ON UPDATE => cascade
 #
 
-class Ticket < ActiveRecord::Base
+class Ticket < ApplicationRecord
   enum status: { normal: 0, respond_now: 1, overdue: 2 }
 
   def display_id_with_hash_prefix

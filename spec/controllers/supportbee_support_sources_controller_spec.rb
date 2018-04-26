@@ -69,7 +69,7 @@ RSpec.describe SupportbeeSupportSourcesController, type: :controller do
       @user = create(:user)
       sign_in(@user)
       @source = create(:supportbee, user: @user)
-      get :edit, id: @source.to_param
+      get :edit, params: { id: @source.to_param }
       expect(assigns(:support_source)).to eq(@source)
     end
   end
@@ -83,30 +83,30 @@ RSpec.describe SupportbeeSupportSourcesController, type: :controller do
     context "with valid params" do
       it "creates a new SupportbeeSupportSource" do
         expect {
-          post :create, supportbee_support_source: valid_attributes
+          post :create, params: { supportbee_support_source: valid_attributes }
         }.to change(SupportbeeSupportSource, :count).by(1)
       end
 
       it "assigns a newly created supportbee_support_source as @support_source" do
-        post :create, supportbee_support_source: valid_attributes
+        post :create, params: { supportbee_support_source: valid_attributes }
         expect(assigns(:support_source)).to be_a(SupportbeeSupportSource)
         expect(assigns(:support_source)).to be_persisted
       end
 
       it "redirects to the created supportbee_support_source" do
-        post :create, supportbee_support_source: valid_attributes
+        post :create, params: { supportbee_support_source: valid_attributes }
         expect(response).to redirect_to(support_sources_url)
       end
     end
 
     context "with invalid params" do
       it "assigns a newly created but unsaved supportbee_support_source as @support_source" do
-        post :create, supportbee_support_source: invalid_attributes
+        post :create, params: { supportbee_support_source: invalid_attributes }
         expect(assigns(:support_source)).to be_a_new(SupportbeeSupportSource)
       end
 
       it "re-renders the 'new' template" do
-        post :create, supportbee_support_source: invalid_attributes
+        post :create, params: { supportbee_support_source: invalid_attributes }
         expect(response).to render_template("new")
       end
     end
@@ -128,31 +128,31 @@ RSpec.describe SupportbeeSupportSourcesController, type: :controller do
 
     context "with valid params" do
       it "updates the requested support source" do
-        put :update, id: @source.to_param, supportbee_support_source: new_attributes
+        put :update, params: { id: @source.to_param, supportbee_support_source: new_attributes }
         @source.reload
         expect(@source.name).to eq('New name')
         expect(@source.supportbee_company_id).to eq('photonblast')
       end
 
       it "assigns the requested support source as @support_source" do
-        put :update, id: @source.to_param, supportbee_support_source: valid_attributes
+        put :update, params: { id: @source.to_param, supportbee_support_source: valid_attributes }
         expect(assigns(:support_source)).to eq(@source)
       end
 
       it "redirects to the support source" do
-        put :update, id: @source.to_param, supportbee_support_source: valid_attributes
+        put :update, params: { id: @source.to_param, supportbee_support_source: valid_attributes }
         expect(response).to redirect_to(@source)
       end
     end
 
     context "with invalid params" do
       it "assigns the support source as @support_source" do
-        put :update, id: @source.to_param, supportbee_support_source: invalid_attributes
+        put :update, params: { id: @source.to_param, supportbee_support_source: invalid_attributes }
         expect(assigns(:support_source)).to eq(@source)
       end
 
       it "re-renders the 'edit' template" do
-        put :update, id: @source.to_param, supportbee_support_source: invalid_attributes
+        put :update, params: { id: @source.to_param, supportbee_support_source: invalid_attributes }
         expect(response).to render_template("edit")
       end
     end
@@ -167,12 +167,12 @@ RSpec.describe SupportbeeSupportSourcesController, type: :controller do
 
     it "destroys the requested supportbee_support_source" do
       expect {
-        delete :destroy, id: @source.to_param
+        delete :destroy, params: { id: @source.to_param }
       }.to change(SupportbeeSupportSource, :count).by(-1)
     end
 
     it "redirects to the supportbee_support_sources list" do
-      delete :destroy, id: @source.to_param
+      delete :destroy, params: { id: @source.to_param }
       expect(response).to redirect_to(support_sources_url)
     end
   end

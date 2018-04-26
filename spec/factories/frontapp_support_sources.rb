@@ -1,4 +1,4 @@
-FactoryGirl.define do
+FactoryBot.define do
   factory :frontapp, class: 'FrontappSupportSource' do
     name 'phusion'
     frontapp_auth_token '1234'

@@ -2,13 +2,13 @@ source 'https://rubygems.org'
 
 
 # Bundle edge Rails instead: gem 'rails', github: 'rails/rails'
-gem 'rails', '~> 4.2.1'
+gem 'rails', '~> 5.1.0'
 # Use SCSS for stylesheets
 gem 'sass-rails', '~> 5.0'
 # Use Uglifier as compressor for JavaScript assets
 gem 'uglifier', '>= 1.3.0'
 # Use CoffeeScript for .coffee assets and views
-gem 'coffee-rails', '~> 4.1.0'
+gem 'coffee-rails', '~> 4.2'
 # See https://github.com/rails/execjs#readme for more supported runtimes
 gem 'therubyracer', platforms: :ruby
 
@@ -27,8 +27,8 @@ gem 'sdoc', '~> 0.4.0', group: :doc
 gem 'pg'
 gem 'devise'
 gem 'octokit'
-gem 'supportbee', github: 'phusion/supportbee'
-gem 'frontapp', github: 'phusion/frontapp'
+gem 'supportbee', git: 'https://github.com/phusion/supportbee'
+gem 'frontapp', git: 'https://github.com/phusion/frontapp'
 
 gem 'net-http-persistent', '~> 2.9'
 gem 'default_value_for'
@@ -36,29 +36,27 @@ gem 'concurrent-ruby'
 gem 'rest-client'
 gem 'acts_as_list'
 gem 'schema_associations'
-gem 'schema_auto_foreign_keys'
+# gem 'schema_auto_foreign_keys'
+gem 'schema_plus_foreign_keys', git: 'https://github.com/phusion/schema_plus_foreign_keys'
 gem 'schema_validations'
 
 group :development do
-  gem 'quiet_assets'
   gem 'annotate'
   gem 'spring-commands-rspec'
   gem 'capistrano-rails'
   gem 'capistrano-passenger'
   gem 'capistrano-bundler'
   gem 'capistrano-rvm'
-  gem 'rbnacl', '>= 3.2', '< 5.0'
   gem 'rbnacl-libsodium'
+  gem 'rbnacl', '>= 3.2', '< 5.0'
   gem 'bcrypt_pbkdf', '>= 1.0', '< 2.0'
 
   # Access an IRB console on exception pages or by using <%= console %> in views
-  gem 'web-console', '~> 2.0'
+  # gem 'web-console', '~> 2.0'
+  gem 'web-console'
 end
 
 group :development, :test do
-  # Call 'debugger' anywhere in the code to stop execution and get a debugger console
-  #gem 'debugger'
-
   # Spring speeds up development by keeping your application running in the background. Read more: https://github.com/rails/spring
   gem 'spring'
 
@@ -69,8 +67,9 @@ end
 group :test do
   gem 'test-unit'
   gem 'webmock'
-  gem 'factory_girl_rails'
+  gem 'factory_bot_rails'
   gem 'database_cleaner'
+  gem 'rails-controller-testing'
 end
 
 group :development, :ci do

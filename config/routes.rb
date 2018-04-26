@@ -18,16 +18,21 @@ Rails.application.routes.draw do
 
   # Example of regular route:
   #   get 'products/:id' => 'catalog#view'
-  post 'webhooks/github/:action' => 'webhooks/github_webhook'
+  namespace :webhooks do
+    scope :github, controller: :github_webhook do
+      post 'hook'
+    end
+  end
+  # post 'webhooks/github/:action' => 'webhooks/github_webhook'
 
   # Example of named route that can be invoked with purchase_url(id: product.id)
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
-  post 'admin/sync_github' => 'admin_area#sync_github'
-  post 'admin/sync_supportbee' => 'admin_area#sync_supportbee'
-  post 'admin/sync_frontapp' => 'admin_area#sync_frontapp'
-  post 'admin/sync_rss' => 'admin_area#sync_rss'
-  get 'admin' => 'admin_area#index', as: :admin_area
-  get 'admin(/:action)' => 'admin_area'
+  scope :admin, controller: :admin_area, as: :admin_area do
+    get '/', action: 'index'
+    %w(sync_github sync_supportbee sync_frontapp sync_rss).each do |action|
+      post action
+    end
+  end
 
   # Example resource route (maps HTTP verbs to controller actions automatically):
   #   resources :products
