@@ -1,10 +1,8 @@
 # Deploying to production
 
-_This guide is for non-Phusion employees. If you are a Phusion employee, please read the [Phusion employee deployment guide.](PHUSION_DEPLOYMENT.md)_
-
 This app requires PostgreSQL.
 
- 1. Install Ruby 2.2.
+ 1. Install Ruby > 2.2. (setup is tested up to Ruby 2.5 and Rails 5.0)
  2. [Install Nginx + Passenger](https://wwww.phusionpassenger.com/).
  3. Create a user `support_central`:
 
@@ -73,3 +71,10 @@ This app requires PostgreSQL.
             root /var/www/support_central/public;
             passenger_enabled on;
         }
+
+13. Connect your support channels. 
+![Support Central](https://phusion.github.io/support_central/img/supportcentral.png)
+
+14. Marvel at the beauty of it all. 
+
+_This guide is for non-Phusion employees. If you are a Phusion employee, please read the [Phusion employee deployment guide.](PHUSION_DEPLOYMENT.md)_
