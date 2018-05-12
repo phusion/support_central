@@ -3,6 +3,13 @@ class DashboardController < ApplicationController
     @support_sources = current_user.support_sources.
       order(:position).
       includes(:tickets)
+    @all_tickets = {
+      id: "0",
+      name: "All",
+      tickets: @support_sources.map(&:tickets).flatten
+    } 
+
+    @support_sources = @support_sources.to_a.unshift(@all_tickets)
   end
 
   def ignore

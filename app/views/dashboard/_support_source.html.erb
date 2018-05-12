@@ -1,36 +1,35 @@
-<div role="tabpanel" class="tab-pane support-source <%= 'active' if support_source_counter == 0 %>" id="support_source_<%= support_source.id %>">
+<div role="tabpanel" class="tab-pane support-source <%= 'active' if support_source_counter == 0 %>" id="support_source_<%= support_source[:id] %>">
 
     <div class="support-source-tab-panel-tools">
         Selection tools:
-        <a href="javascript:void(selectAll(<%= support_source.id %>))" class="tool">Select all</a>
-        <a href="javascript:void(selectNone(<%= support_source.id %>))" class="tool">Select none</a>
-        <a href="javascript:void(ignoreSelectedTickets(<%= support_source.id %>))" class="tool">Ignore selected</a>
+        <a href="javascript:void(selectAll(<%= support_source[:id] %>))" class="tool">Select all</a>
+        <a href="javascript:void(selectNone(<%= support_source[:id] %>))" class="tool">Select none</a>
+        <a href="javascript:void(ignoreSelectedTickets(<%= support_source[:id] %>))" class="tool">Ignore selected</a>
     </div>
 
-    <% if support_source.scheduler.working? %>
-        <div class="support-source-announcement">
-            <div class="alert alert-info">This support source is being synchronized. <a href="javascript:void(window.location.reload())" class="alert-link">Reload this page</a> in a few minutes to check for updates.</div>
-        </div>
-    <% end %>
-
-    <% if support_source.tickets.empty? %>
-        <div class="intro-text intro-text-with-margin">
-            <p>Hurray, there are no open support tickets for this source. :-)</p>
-        </div>
-    <% else %>
+    <% if support_source[:tickets] %>
+        <ul class="list-unstyled">
+            <%= render partial: 'ticket', collection: support_source[:tickets] %>
+        </ul>
+     <% else %>
+        <% if support_source.scheduler.working? %>
+            <div class="support-source-announcement">
+                <div class="alert alert-info">This support source is being synchronized. <a href="javascript:void(window.location.reload())" class="alert-link">Reload this page</a> in a few minutes to check for updates.</div>
+            </div>
+        <% end %>   
         <ul class="list-unstyled">
             <%= render partial: 'ticket', collection: support_source.tickets %>
         </ul>
+        <div class="support-source-footer">
+            <%= link_to admin_area_path do %>
+                Last synchronized at:
+                <% if support_source.scheduler.last_run_time%>
+                    <%= distance_of_time_in_words_to_now(support_source.scheduler.last_run_time) %> ago
+                <% else %>
+                    N/A
+                <% end %>
+            <% end %>
+        </div>
     <% end %>
 
-    <div class="support-source-footer">
-        <%= link_to admin_area_path do %>
-            Last synchronized at:
-            <% if support_source.scheduler.last_run_time %>
-                <%= distance_of_time_in_words_to_now(support_source.scheduler.last_run_time) %> ago
-            <% else %>
-                N/A
-            <% end %>
-        <% end %>
-    </div>
 </div>
