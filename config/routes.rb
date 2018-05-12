@@ -29,7 +29,7 @@ Rails.application.routes.draw do
   #   get 'products/:id/purchase' => 'catalog#purchase', as: :purchase
   scope :admin, controller: :admin_area, as: :admin_area do
     get '/', action: 'index'
-    %w(sync_github sync_supportbee sync_frontapp sync_rss).each do |action|
+    %w(sync_github sync_supportbee sync_frontapp sync_rss sync_my_sources).each do |action|
       post action
     end
   end

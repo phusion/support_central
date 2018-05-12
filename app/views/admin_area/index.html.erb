@@ -28,4 +28,9 @@
         <h3>RSS</h3>
         <%= render partial: 'scheduler', locals: { scheduler: RssScheduler.instance, sync_action: 'sync_rss' } %>
     </div>
+    <div class="col-md-4">
+        <h3>All my sources</h3>
+
+        <%= link_to 'Synchronize now', "admin/sync_my_sources", method: 'post', class: 'btn btn-primary' %>
+    </div>
 </div>
