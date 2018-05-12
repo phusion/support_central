@@ -18,7 +18,7 @@
             <div class="support-source-announcement">
                 <div class="alert alert-info">This support source is being synchronized. <a href="javascript:void(window.location.reload())" class="alert-link">Reload this page</a> in a few minutes to check for updates.</div>
             </div>
-        <% end %>   
+        <% end %>
         <ul class="list-unstyled">
             <%= render partial: 'ticket', collection: support_source.tickets %>
         </ul>
@@ -34,7 +34,7 @@
                         N/A
                     <% end %>
                     <br />
-                    <%= link_to 'Sync now', "admin/sync_#{support_source.name.downcase}", method: 'post', class: 'btn btn-primary' %>
+                    <%= link_to 'Sync now', "admin/sync_#{support_source.type_name.downcase}", method: 'post', class: 'btn btn-primary' %>
                 <% end %>
             <% end %>
         </div>
