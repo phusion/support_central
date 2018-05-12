@@ -3,7 +3,7 @@
         <input type="checkbox" class="form-control" data-ticket-id="<%= ticket.id %>">
     </div>
 
-    <%= link_to ticket.external_url, target: '_blank', class: 'ticket-link' do %>
+    <%= link_to ticket.external_url, target: 'ticket_details', class: 'ticket-link' do %>
         <span class="arrow" aria-hidden="true">
             <span class="glyphicon glyphicon-chevron-right"></span>
         </span>
@@ -26,6 +26,7 @@
                 Last update
             <% end %>
             <%= distance_of_time_in_words_to_now(ticket.external_last_update_time) %> ago
+            
         </span>
     <% end %>
 </li>

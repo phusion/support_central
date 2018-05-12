@@ -7,6 +7,8 @@
         <a href="javascript:void(ignoreSelectedTickets(<%= support_source[:id] %>))" class="tool">Ignore selected</a>
     </div>
 
+
+    <div id="tickets_list">
     <% if support_source[:tickets] %>
         <ul class="list-unstyled">
             <%= render partial: 'ticket', collection: support_source[:tickets] %>
@@ -22,14 +24,20 @@
         </ul>
         <div class="support-source-footer">
             <%= link_to admin_area_path do %>
-                Last synchronized at:
-                <% if support_source.scheduler.last_run_time%>
-                    <%= distance_of_time_in_words_to_now(support_source.scheduler.last_run_time) %> ago
+                <% if support_source.scheduler.working? %>
+                    <%= button_to 'Synchronize now', '#', disabled: true, class: 'btn btn-primary' %> <small>scheduler is working now</small>
                 <% else %>
-                    N/A
+                Last synchronized at:
+                    <% if support_source.scheduler.last_run_time%>
+                        <%= distance_of_time_in_words_to_now(support_source.scheduler.last_run_time) %> ago
+                    <% else %>
+                        N/A
+                    <% end %>
+                    <br />
+                    <%= link_to 'Sync now', "admin/sync_#{support_source.name.downcase}", method: 'post', class: 'btn btn-primary' %>
                 <% end %>
             <% end %>
         </div>
     <% end %>
-
+    </div>
 </div>
