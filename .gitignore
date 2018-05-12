@@ -20,3 +20,10 @@
 /log/*
 !/log/.keep
 /tmp
+
+# Ignore all Node modules
+/node_modules
+
+# Ignore all the config files
+/config/*.*.example
+/package-lock.json
