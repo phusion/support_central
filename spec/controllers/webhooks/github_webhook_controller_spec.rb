@@ -67,7 +67,7 @@ RSpec.describe Webhooks::GithubWebhookController, type: :controller do
     request.headers['X-GitHub-Event'] = event.to_s
     request.headers['X-Hub-Signature'] = "sha1=#{OpenSSL::HMAC.hexdigest(HMAC_DIGEST,
       secret, request_body)}"
-    post :hook, request_body
+    post :hook, body: request_body
   end
 
   describe 'security' do

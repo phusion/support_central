@@ -13,7 +13,7 @@ class Webhooks::GithubWebhookController < ApplicationController
     elsif event == :issue_comment
       handle_issue_comment_event
     end
-    render text: 'ok'
+    render plain: 'ok'
   end
 
 private
@@ -69,7 +69,7 @@ private
       Rails.logger.error 'Github signature mismatch. ' \
         "Actual: #{signature_header}, " \
         "expected: #{expected_signature}"
-      render text: 'Invalid signature', status: 401
+      render plain: 'Invalid signature', status: 401
     end
   end
 
