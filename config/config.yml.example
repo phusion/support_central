@@ -13,3 +13,18 @@ production:
   # setup a webhook in Github and what to do with the secret
   # you picked.
   github_webhook_secret: ...
+
+test:
+  email_from: foo@bar.com
+  root_url: http://www.yourhost.com
+
+  github_api_token: ...
+  github_webhook_secret: ...
+
+development:
+  email_from: foo@bar.com
+  root_url: http://www.yourhost.com
+
+  github_api_token: ...
+  github_webhook_secret: ...
+

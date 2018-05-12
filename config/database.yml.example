@@ -1,8 +1,27 @@
+# fill in your credentials for Postgres
 production:
   adapter: postgresql
   host: localhost
-  username: foo
-  password: bar
-  database: support_central
+  username:
+  password:
+  database: support_central_production
+  pool: 5
+  timeout: 5000
+
+test:
+  adapter: postgresql
+  host: localhost
+  username:
+  password:
+  database: support_central_test
+  pool: 5
+  timeout: 5000
+
+development:
+  adapter: postgresql
+  host: localhost
+  username:
+  password:
+  database: support_central_development
   pool: 5
   timeout: 5000
