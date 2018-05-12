@@ -3,6 +3,7 @@ class DashboardController < ApplicationController
     @support_sources = current_user.support_sources.
       order(:position).
       includes(:tickets)
+
     @all_tickets = {
       id: "0",
       name: "All",
